@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright © 2016 Magento. All rights reserved.
+ * See COPYING.txt for license details.
+ */
+-->
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Payment Method Facade configuration -->
+    <virtualType name="PaymarkOEFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">\Onfire\PaymarkOE\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Onfire\PaymarkOE\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">PaymarkOEValueHandlerPool</argument>
+            <argument name="commandPool" xsi:type="object">PaymarkOECommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PaymarkOEValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">PaymarkOEConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PaymarkOEConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">PaymarkOEConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Commands infrastructure -->
+    <virtualType name="PaymarkOECommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="initialize" xsi:type="string">PaymarkOEInitializeCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="PaymarkOEInitializeCommand" type="Onfire\PaymarkOE\Gateway\Command\InitializeCommand"></virtualType>
+
+    <preference for="Onfire\PaymarkOE\Api\QueryManagementInterface" type="Onfire\PaymarkOE\Model\Api\QueryManagement" />
+
+    <!-- Configuration reader -->
+    <virtualType name="PaymarkOEConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">\Onfire\PaymarkOE\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Onfire\PaymarkOE\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">PaymarkOEConfig</argument>
+        </arguments>
+    </type>
+
+    <type name="Onfire\PaymarkOE\Logger\PaymentLogger">
+        <arguments>
+            <argument name="name" xsi:type="string">PaymarkOE</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Onfire\PaymarkOE\Logger\Handler\Paymark</item>
+            </argument>
+        </arguments>
+    </type>
+
+    <!-- Logger, initialized with PaymarkConfig -->
+    <virtualType name="PaymarkOELogger" type="Magento\Payment\Model\Method\Logger">
+        <arguments>
+            <argument name="config" xsi:type="object">PaymarkOEConfig</argument>
+        </arguments>
+    </virtualType>
+
+</config>
