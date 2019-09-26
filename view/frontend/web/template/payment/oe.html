@@ -25,16 +25,20 @@
             <!--/ko-->
         </div>
 
-        <form id="paymarkoe_form">
-            <div class="paymark-oe">
-                <div class="field required">
-                    <div class="control">
-                        <label data-bind="i18n: 'Select Bank', attr: {for: getCode() + '_bank_id'}"></label>
+        <div class="paymark-oe">
+            <div class="paymark-oe-logo">
+                <img width="160" data-bind="attr: {src: onlineEftposLogo}" />
+            </div>
+            <div class="paymark-oe-fields">
+                <form id="paymarkoe_form">
+                    <div class="field required">
+                        <div class="control">
+                            <label data-bind="i18n: 'Select Bank', attr: {for: getCode() + '_bank_id'}"></label>
 
-                        <select name="payment[paymarkoe_bank_id]"
-                                class="select"
-                                data-validate="{required:true}"
-                                data-bind="
+                            <select name="payment[paymarkoe_bank_id]"
+                                    class="select"
+                                    data-validate="{required:true}"
+                                    data-bind="
                                     attr:{
                                         title: $t('Select Bank'),
                                         id: getCode() + '_bank_id'
@@ -43,46 +47,46 @@
                                       optionsValue: 'value',
                                       optionsText: 'text',
                                       value: selectedBank">
-                        </select>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <div class="field required">
-                    <div class="control">
-                        <label data-bind="i18n: 'Mobile Number', attr: {for: getCode() + '_mobile_number'}"></label>
+                    <div class="field required">
+                        <div class="control">
+                            <label data-bind="i18n: 'Mobile Number', attr: {for: getCode() + '_mobile_number'}"></label>
 
-                        <input type="text"
-                               class="input-text"
-                               name="payment[paymarkoe_mobile_number]"
-                               placeholder="Mobile Number"
-                               data-validate="{required:true, 'validate-number':true, 'validate-nz-phone':true}"
-                               data-bind="attr:{
+                            <input type="text"
+                                   class="input-text"
+                                   name="payment[paymarkoe_mobile_number]"
+                                   placeholder="Mobile Number"
+                                   data-validate="{required:true, 'validate-number':true, 'validate-nz-phone':true}"
+                                   data-bind="attr:{
                                                 title: $t('Mobile Number'),
                                                 id: getCode() + '_mobile_number'
                                            },
                                            value: mobileNumber,
                                            valueUpdate: 'keyup'" />
 
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
-
-            <!-- <div data-bind="if: showAutopay">
-             </div>-->
-
-        </form>
-
-        <div class="actions-toolbar">
-            <div class="primary">
-                <button class="action primary checkout"
-                        type="submit"
-                        data-bind="
+            <div class="paymark-oe-actions">
+                <div class="actions-toolbar">
+                    <div class="primary">
+                        <button class="action primary checkout"
+                                type="submit"
+                                data-bind="
                         click: placeOrder,
                         attr: {title: $t('Place Order')}
                         ">
-                    <span data-bind="i18n: 'Place Order'"></span>
-                </button>
+                            <span data-bind="i18n: 'Place Order'"></span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
+
+
     </div>
 </div>

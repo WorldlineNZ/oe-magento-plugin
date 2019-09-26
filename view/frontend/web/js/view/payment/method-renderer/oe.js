@@ -9,9 +9,10 @@ define(
         'jquery',
         'ko',
         'Magento_Checkout/js/view/payment/default',
+        'Magento_Checkout/js/model/quote',
         'Onfire_PaymarkOE/js/action/paymark-query'
     ],
-    function ($, ko, Component, paymarkQuery) {
+    function ($, ko, Component, quote, paymarkQuery) {
         'use strict';
 
         var paymarkConfig = window.checkoutConfig.payment.paymarkoe;
@@ -24,7 +25,19 @@ define(
             })
         });
 
-        var mobileNumber = ko.observable();
+        var defaultPhone = null;
+
+        // if billing phone is set and matches our regex, set the mobile observable to it.
+        if(quote.billingAddress() != null && quote.billingAddress().telephone != null) {
+            var billingPhone = quote.billingAddress().telephone;
+            if(billingPhone.length >= 9 &&  billingPhone.length <= 11
+                && billingPhone.match(/^0{1}(20|21|22|27|28|29){1}\d{6,8}$/)) {
+
+                defaultPhone = billingPhone;
+            }
+        }
+
+        var mobileNumber = ko.observable(defaultPhone);
         var selectedBank = ko.observable();
 
         $.each({
@@ -43,6 +56,7 @@ define(
             mobileNumber: mobileNumber,
             selectedBank: selectedBank,
 
+            onlineEftposLogo: paymarkConfig.logo,
             showAutopay: paymarkConfig.allow_autopay,
             availableBanks : availBanks,
 
