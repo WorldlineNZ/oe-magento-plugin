@@ -28,15 +28,19 @@ class DataAssignObserver extends AbstractDataAssignObserver
         if ($data->getDataByKey('additional_data') !== null) {
             $additional = $data->getDataByKey('additional_data');
 
-            $paymentInfo->setAdditionalInformation(
-                'mobile_number',
-                $additional['mobile_number']
-            );
+            if(!empty($additional['mobile_number'])) {
+                $paymentInfo->setAdditionalInformation(
+                    'mobile_number',
+                    $additional['mobile_number']
+                );
+            }
 
-            $paymentInfo->setAdditionalInformation(
-                'selected_bank',
-                $additional['selected_bank']
-            );
+            if(!empty($additional['selected_bank'])) {
+                $paymentInfo->setAdditionalInformation(
+                    'selected_bank',
+                    $additional['selected_bank']
+                );
+            }
         }
     }
 }
