@@ -65,6 +65,6 @@ class Response extends \Magento\Framework\App\Action\Action implements CsrfAware
 
         $result = $helper->checkTransactionAndProcess($transaction);
 
-        $helper->log(__METHOD__. " process transaction result: " .$result);
+        $helper->log(__METHOD__. " process transaction result: " . $result);
     }
 }

@@ -7,6 +7,7 @@ use Magento\Payment\Gateway\CommandInterface;
 use Magento\Payment\Gateway\Data\OrderAdapterInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObject;
 use Magento\Sales\Model\Order\Payment\Interceptor;
+use Onfire\PaymarkOE\Helper\Helper;
 
 /**
  * InitializeCommand
@@ -65,7 +66,11 @@ class InitializeCommand implements CommandInterface
 
         try {
             // check if the payment is already complete
-            $helper->checkTransactionAndProcess($apiHelper->findTransaction($transactionId));
+            $result = $helper->checkTransactionAndProcess($apiHelper->findTransaction($transactionId));
+
+            if($result && $result == Helper::RESULT_FAILED) {
+                throw new \Exception('Payment was declined');
+            }
 
         } catch(\Exception $e) {
             $helper->log(__METHOD__. " initialize exception");

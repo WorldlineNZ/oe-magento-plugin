@@ -58,6 +58,10 @@ class Helper
 
     const PAYMENT_AUTHORISED = 'AUTHORISED';
 
+    const RESULT_SUCCESS = 'success';
+
+    const RESULT_FAILED = 'failed';
+
     /**
      * Helper constructor.
      * @param ScopeConfigInterface $scopeConfig
@@ -170,7 +174,6 @@ class Helper
         return $this->processTransaction($transaction);
     }
 
-
     /**
      * Process response from Paymark, updating order as required
      *
@@ -209,7 +212,7 @@ class Helper
 
                 $this->sendOrderEmail($order);
 
-                return true;
+                return self::RESULT_SUCCESS;
 
             } else {
                 // payment failed
@@ -219,12 +222,12 @@ class Helper
 
                 $this->log(__METHOD__. " " . $incrementId . " quote rolled back, ready to redirect to cart");
 
-                return false;
+                return self::RESULT_FAILED;
             }
 
         } catch (\Exception $e) {
             $this->log(__METHOD__. " Payment failed with error: " . $e->getMessage());
-            return false;
+            return self::RESULT_FAILED;
         }
 
     }
