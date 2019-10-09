@@ -14,16 +14,16 @@ define(
 
         'use strict';
 
-        return function (messageContainer) {
+        return function (messageContainer, onFailure) {
             var module = 'paymarkoe';
             var attempts = 0;
             var timeoutLength = 3000; // 3 second query interval
-            var maxAttempts = 120; // 6 minute wait period (so as that we get a response from the API before this completely fails)
+            var maxAttempts = 103; // 5 minute 3 second wait period (so as that we get a response from the API before this completely fails)
             var redirectUrl = null;
             var finished = false;
             var interval = null;
 
-            fullScreenLoader.startLoader();
+            //fullScreenLoader.startLoader();
 
             if (!customer.isLoggedIn()) {
                 var url = '/guest-carts/:module/query';
@@ -35,7 +35,8 @@ define(
 
             var stopPolling = function () {
                 clearInterval(interval);
-                fullScreenLoader.stopLoader();
+                //fullScreenLoader.stopLoader();
+                onFailure();
             }
 
             // start querying to see if the payment is complete
@@ -65,7 +66,6 @@ define(
                         }
                     })
                     .fail(function (response) {
-                        fullScreenLoader.stopLoader();
                         errorProcessor.process(response, messageContainer);
                         stopPolling();
                     });

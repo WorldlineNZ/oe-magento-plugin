@@ -18,10 +18,11 @@ define(
         var paymarkConfig = window.checkoutConfig.payment.paymarkoe;
         var availBanks = [];
 
-        $.each(paymarkConfig.available_banks, function (id, text) {
+        $.each(paymarkConfig.available_banks, function (id, values) {
             availBanks.push({
                 value: id,
-                text: text,
+                text: values.title,
+                short: values.short,
             })
         });
 
@@ -39,6 +40,32 @@ define(
 
         var mobileNumber = ko.observable(defaultPhone);
         var selectedBank = ko.observable();
+        var autopayAllowed = ko.observable(false);
+        var setupAutoplay = ko.observable();
+        var autopayBanks = paymarkConfig.autopay_banks;
+
+        var loadingBankName = ko.observable();
+        var loadingBankImage = ko.computed(function(){
+            return paymarkConfig.popup_images[selectedBank()];
+        }, self);
+
+        var bankChanged = function() {
+            var newBank = selectedBank();
+
+            var bankName = availBanks.find(function(option) {
+                return option.value == newBank;
+            });
+
+            loadingBankName(bankName.short);
+
+            var allowAutopay = autopayBanks.find(function(option) {
+                return option == newBank;
+            });
+
+            autopayAllowed(allowAutopay ? true : false);
+        }
+
+        selectedBank.subscribe(bankChanged);
 
         $.each({
             'validate-nz-phone': [
@@ -49,16 +76,26 @@ define(
             ]
         }, function (i, rule) {
             rule.unshift(i);
-                $.validator.addMethod.apply($.validator, rule);
+            $.validator.addMethod.apply($.validator, rule);
         });
 
         return Component.extend({
             mobileNumber: mobileNumber,
             selectedBank: selectedBank,
 
+            formSelector: '#paymarkoe_form',
+
             onlineEftposLogo: paymarkConfig.logo,
-            showAutopay: paymarkConfig.allow_autopay,
             availableBanks : availBanks,
+            autopayEnabled: paymarkConfig.allow_autopay,
+            autopayAllowed: autopayAllowed,
+            setupAutoplay: setupAutoplay,
+
+            loadingBankName: loadingBankName,
+            loadingBankImage: loadingBankImage,
+            processingScreen: '#payment-processing',
+            countdownTimer: '.oe-loader-timer',
+            timerInterval: null,
 
             defaults: {
                 template: 'Onfire_PaymarkOE/payment/oe'
@@ -84,18 +121,55 @@ define(
                     'method': this.item.method,
                     'additional_data': {
                         'selected_bank': this.selectedBank(),
-                        'mobile_number': this.mobileNumber()
+                        'mobile_number': this.mobileNumber(),
+                        'setup_autopay': this.setupAutoplay()
                     }
                 };
             },
 
             validate: function () {
-                var form = '#paymarkoe_form';
-                return $(form).validation() && $(form).validation('isValid');
+                return $(this.formSelector).validation() && $(this.formSelector).validation('isValid');
             },
 
             afterPlaceOrder: function() {
-                paymarkQuery(this.messageContainer);
+                this.showPaymentLoader();
+                paymarkQuery(this.messageContainer, this.hidePaymentLoader.bind(this));
+            },
+
+            showPaymentLoader: function () {
+                $(this.processingScreen).addClass('show');
+                this.startCountdownTimer();
+            },
+
+            hidePaymentLoader: function () {
+                $(this.processingScreen).removeClass('show');
+                this.resetCountdownTimer();
+            },
+            
+            startCountdownTimer: function () {
+                var _self = this;
+                var duration = 299; // start at 4:59
+                var minutes;
+                var seconds;
+
+                this.timerInterval = setInterval(function () {
+                    minutes = parseInt(duration / 60, 10);
+                    seconds = parseInt(duration % 60, 10);
+
+                    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                    if (duration > 0) {
+                        --duration;
+                    }
+
+                    $(_self.countdownTimer).text(minutes + ":" + seconds);
+
+                }, 1000);
+            },
+
+            resetCountdownTimer: function () {
+                $(this.countdownTimer).text('5:00');
+                clearInterval(this.timerInterval);
             }
         });
     }

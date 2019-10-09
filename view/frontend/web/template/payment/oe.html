@@ -69,6 +69,19 @@
 
                         </div>
                     </div>
+
+                    <div class="field checkbox" data-bind="if: (autopayEnabled && autopayAllowed)">
+
+                        <input type="checkbox"
+                               name="payment[paymarkoe_enable_autopay]"
+                               data-bind="attr:{
+                                            title: $t('Enable Auto Pay'),
+                                            id: getCode() + '_enable_autopay'
+                                       },
+                                       checked: setupAutoplay" />
+
+                        <label data-bind="i18n: 'Enable Autopay', attr: {for: getCode() + '_enable_autopay'}"></label>
+                    </div>
                 </form>
             </div>
             <div class="paymark-oe-actions">
@@ -77,9 +90,9 @@
                         <button class="action primary checkout"
                                 type="submit"
                                 data-bind="
-                        click: placeOrder,
-                        attr: {title: $t('Place Order')}
-                        ">
+                                    click: placeOrder,
+                                    attr: {title: $t('Place Order')}
+                                ">
                             <span data-bind="i18n: 'Place Order'"></span>
                         </button>
                     </div>
@@ -87,6 +100,14 @@
             </div>
         </div>
 
+        <div id="payment-processing" class="paymark-oe-overlay">
+            <div class="paymark-oe-loader">
+                <p class="oe-loader-title">Payment Request Sent</p>
+                <p>Now, check your <span data-bind="text: loadingBankName"></span> banking app to confirm your payment.</p>
+                <img class="oe-loader-bank" width="160" data-bind="attr: {src: loadingBankImage}" />
+                <p>You have <span class="oe-loader-timer">5:00</span> minutes to confirm payment in your app.</p>
+            </div>
+        </div>
 
     </div>
 </div>

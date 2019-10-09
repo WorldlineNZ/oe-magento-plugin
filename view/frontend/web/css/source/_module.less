@@ -1,4 +1,4 @@
-.paymark-oe {
+.paymark-oe, .paymark-oe-loader {
   max-width: 300px;
   padding: 25px 20px 30px;
   font-size: 16px;
@@ -6,7 +6,9 @@
   background-color: #FFFFFF;
   border-radius: 4px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
 
+.paymark-oe {
   .paymark-oe-logo {
     margin-bottom: 25px;
   }
@@ -32,13 +34,19 @@
         border: 1px solid #cac8cf;
       }
 
+      input[type="checkbox"] {
+        height: auto;
+        margin-top: 0;
+        padding: 0;
+      }
+
       input.mage-error, select.mage-error {
         color: #ff1e00;
         border-color: #ff1e00;
       }
 
       input:focus, select:focus {
-        box-shadow:none;
+        box-shadow: none;
       }
 
       div.mage-error {
@@ -47,6 +55,15 @@
         padding: 10px;
         font-size: 14px;
         background-color: #ffeeed;
+      }
+    }
+
+    div.checkbox {
+      label {
+        margin-bottom: 0px;
+        display: inline-block;
+        vertical-align: top;
+        font-size: 14px;
       }
     }
   }
@@ -64,11 +81,56 @@
         padding: 12px 15px;
         float: none;
         font-size: 18px;
-        font-weight: bold;
+        font-weight: 700;
         color: #FFFFFF;
         background-color: #5a3c9f;
         border: none;
       }
     }
+  }
+}
+
+.paymark-oe-overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: none;
+  z-index: 1000;
+  background-color: rgba(0,0,0,0.2);
+
+  &.show {
+    display: block;
+  }
+}
+
+.paymark-oe-loader {
+  width: 300px;
+  padding: 40px 20px 20px 20px;
+  position: absolute;
+  margin-left: -170px;
+  top: 30%;
+  left: 50%;
+  text-align: center;
+
+  p {
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .oe-loader-title, .oe-loader-timer {
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  .oe-loader-title {
+    margin-bottom: 12px;
+  }
+
+  .oe-loader-bank {
+    margin-bottom: 25px;
   }
 }
