@@ -11,7 +11,7 @@
         <payment>
             <paymarkoe>
                 <active>0</active>
-                <title>Paymark Online Eftpos</title>
+                <title>Paymark Online EFTPOS</title>
                 <model>PaymarkOEFacade</model>
                 <debug>1</debug>
                 <debug_log>1</debug_log>

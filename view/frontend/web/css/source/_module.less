@@ -40,6 +40,10 @@
         padding: 0;
       }
 
+      input.input-mobile {
+        letter-spacing: 2px;
+      }
+
       input.mage-error, select.mage-error {
         color: #ff1e00;
         border-color: #ff1e00;
@@ -64,6 +68,56 @@
         display: inline-block;
         vertical-align: top;
         font-size: 14px;
+      }
+    }
+
+    .bank-select {
+      border: 1px solid #cac8cf;
+      border-radius: 4px;
+      display: flex;
+
+      .bank-select-input {
+        height: 40px;
+        padding: 0 10px;
+        flex-basis: 25%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-right: 1px solid #cac8cf;
+
+        &:last-child {
+          border: none;
+        }
+
+        label {
+          margin: 0;
+          cursor: pointer;
+          display: flex;
+          transition: filter 250ms ease-out, opacity 250ms ease-out;
+        }
+
+        input.radio {
+          visibility: hidden;
+          position: absolute;
+          height: 0;
+          width: 0;
+          padding: 0;
+          margin: 0;
+        }
+      }
+
+      &.option-selected {
+        label {
+          -webkit-filter: grayscale(100%);
+          filter: grayscale(100%);
+          opacity: 0.6;
+        }
+
+        input.radio:checked + label {
+          -webkit-filter: grayscale(0%);
+          filter: grayscale(0%);
+          opacity: 1;
+        }
       }
     }
   }

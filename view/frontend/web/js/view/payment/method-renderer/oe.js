@@ -23,6 +23,7 @@ define(
                 value: id,
                 text: values.title,
                 short: values.short,
+                logo: values.logo
             })
         });
 
@@ -43,6 +44,7 @@ define(
         var autopayAllowed = ko.observable(false);
         var setupAutoplay = ko.observable();
         var autopayBanks = paymarkConfig.autopay_banks;
+        var bankLogos = paymarkConfig.bank_logos;
 
         var loadingBankName = ko.observable();
         var loadingBankImage = ko.computed(function(){
@@ -62,7 +64,13 @@ define(
                 return option == newBank;
             });
 
-            autopayAllowed(allowAutopay ? true : false);
+            var shouldAllowAutopay = (allowAutopay && window.isCustomerLoggedIn) ? true : false;
+
+            autopayAllowed(shouldAllowAutopay);
+
+            if(!shouldAllowAutopay) {
+                setupAutoplay(0);
+            }
         }
 
         selectedBank.subscribe(bankChanged);
@@ -86,10 +94,11 @@ define(
             formSelector: '#paymarkoe_form',
 
             onlineEftposLogo: paymarkConfig.logo,
-            availableBanks : availBanks,
+            availableBanks: availBanks,
             autopayEnabled: paymarkConfig.allow_autopay,
             autopayAllowed: autopayAllowed,
             setupAutoplay: setupAutoplay,
+            bankLogos: bankLogos,
 
             loadingBankName: loadingBankName,
             loadingBankImage: loadingBankImage,
@@ -134,6 +143,10 @@ define(
             afterPlaceOrder: function() {
                 this.showPaymentLoader();
                 paymarkQuery(this.messageContainer, this.hidePaymentLoader.bind(this));
+            },
+
+            getLogoImage: function (bank) {
+                return this.bankLogos[bank];
             },
 
             showPaymentLoader: function () {

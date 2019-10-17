@@ -31,23 +31,33 @@
             </div>
             <div class="paymark-oe-fields">
                 <form id="paymarkoe_form">
-                    <div class="field required">
+                    <div class="field banks required">
                         <div class="control">
-                            <label data-bind="i18n: 'Select Bank', attr: {for: getCode() + '_bank_id'}"></label>
+                            <label data-bind="i18n: 'Select Bank'"></label>
 
-                            <select name="payment[paymarkoe_bank_id]"
-                                    class="select"
-                                    data-validate="{required:true}"
-                                    data-bind="
-                                    attr:{
-                                        title: $t('Select Bank'),
-                                        id: getCode() + '_bank_id'
-                                      },
-                                      options: availableBanks,
-                                      optionsValue: 'value',
-                                      optionsText: 'text',
-                                      value: selectedBank">
-                            </select>
+                            <div data-bind="css: {
+                                'bank-select':  true,
+                                'option-selected':  selectedBank()
+                            }, foreach: availableBanks">
+                                <div class="bank-select-input" data-bind="css: {
+                                    'bank-select-input':  true,
+                                    'selected':  value == $parent.selectedBank()
+                                }">
+                                    <input type="radio"
+                                           class="radio required-entry"
+                                           name="payment[paymarkoe_bank_id][]"
+                                           data-validate="{'validate-one-required-by-name': true}"
+                                           data-bind="attr:{
+                                                id: 'bank_id_' + value,
+                                                value: value
+                                           },
+                                           checked: $parent.selectedBank"/>
+
+                                    <label data-bind="attr: {for: 'bank_id_' + value}">
+                                        <img height="40" data-bind="attr: { src: $parent.getLogoImage(value) }" />
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -56,9 +66,8 @@
                             <label data-bind="i18n: 'Mobile Number', attr: {for: getCode() + '_mobile_number'}"></label>
 
                             <input type="text"
-                                   class="input-text"
+                                   class="input-text input-mobile"
                                    name="payment[paymarkoe_mobile_number]"
-                                   placeholder="Mobile Number"
                                    data-validate="{required:true, 'validate-number':true, 'validate-nz-phone':true}"
                                    data-bind="attr:{
                                                 title: $t('Mobile Number'),

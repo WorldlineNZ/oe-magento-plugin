@@ -23,7 +23,7 @@ php bin/magento setup:upgrade
 
 ## Config
 
-You will need to register for Online Eftpos before configuring this module. Visit www.paymark.co.nz for more info.
+You will need to register for Online EFTPOS before configuring this module. Visit www.paymark.co.nz for more info.
 
 After the module has been installed go to `Stores > Settings > Configuration > Sales > Payment Methods` in the Magento Admin to find the configuration options.
 
