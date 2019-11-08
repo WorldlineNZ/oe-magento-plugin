@@ -28,6 +28,10 @@
                 <is_gateway>1</is_gateway>
                 <sort_order>2</sort_order>
             </paymarkoe>
+            <!--<paymarkoe_vault>
+                <model>PaymarkOEVaultFacade</model>
+                <title>Online EFTPOS</title>
+            </paymarkoe_vault>-->
         </payment>
     </default>
 </config>

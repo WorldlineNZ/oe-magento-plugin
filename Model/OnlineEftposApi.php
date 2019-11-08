@@ -4,6 +4,7 @@ namespace Onfire\PaymarkOE\Model;
 
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\StoreManager;
+use Onfire\PaymarkOE\Exception\ApiConflictException;
 use Zend\Http\Client;
 use Zend\Http\Request;
 
@@ -75,6 +76,12 @@ class OnlineEftposApi
      */
     protected $_storeManager;
 
+    const TYPE_REGULAR = 'REGULAR';
+
+    const TYPE_TRUSTSETUP = 'TRUSTSETUP';
+
+    const TYPE_TRUSTED = 'TRUSTED';
+
     /**
      * OnlineEftposApi constructor.
      * @param Client $zendClient
@@ -132,11 +139,12 @@ class OnlineEftposApi
      * @param $description
      * @param $merchantUrl
      * @param $callbackUrl
+     * @param $type
      * @param string $payerType
      * @return mixed
      * @throws \Exception
      */
-    public function createTransaction($orderId, $value, $currency, $payerId, $bankId, $description, $merchantUrl, $callbackUrl, $payerType = 'MOBILE')
+    public function createTransaction($orderId, $value, $currency, $payerId, $bankId, $description, $merchantUrl, $callbackUrl, $type = self::TYPE_REGULAR, $payerType = 'MOBILE')
     {
         $params = [
             'bank' => [
@@ -151,7 +159,7 @@ class OnlineEftposApi
             ],
             'transaction' => [
                 'amount' => $value,
-                'transactionType' => 'REGULAR',
+                'transactionType' => $type,
                 'currency' => $currency,
                 'description' => $description,
                 'orderId' => $orderId,
@@ -173,6 +181,20 @@ class OnlineEftposApi
     public function getTransaction($transactionId)
     {
         return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId);
+    }
+
+    /**
+     * Delete autopay contract at Paymark
+     *
+     * @param $autopayId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function deleteAutopayContract($autopayId)
+    {
+        return $this->call(Request::METHOD_PUT, 'oemerchanttrust/' . $autopayId, [
+            'status' => 'CANCELLED'
+        ]);
     }
 
     /**
@@ -209,11 +231,13 @@ class OnlineEftposApi
                     'Content-Type' => $contentType
                 ]);
 
-                if($method == Request::METHOD_POST) {
+                if($method != Request::METHOD_GET) {
                     // data needs to be sent raw due to custom content-type header
                     $this->_client->setRawBody(json_encode($params));
                 }
             }
+
+            $this->_helper->log(json_encode($params));
 
             $this->_client->setUri($baseUrl . $uri);
 
@@ -234,15 +258,21 @@ class OnlineEftposApi
         // parse body
         $responseData = json_decode($response->getBody());
 
+        // enable to log full response body
+        //$this->_helper->log('status:' . $response->getStatusCode());
+        //$this->_helper->log($response->getBody());
+
         // http error code
         $this->setStatusCode($response->getStatusCode());
 
-        //@todo v3 catch 409 with Autopay for duplicate numbers etc
         switch ($response->getStatusCode()) {
             case 200:
             case 201:
             case 204:
                 return $responseData;
+
+            case 409:
+                throw new ApiConflictException($responseData->error, $response->getStatusCode());
 
             default:
                 if(!empty($responseData->error_description)) {

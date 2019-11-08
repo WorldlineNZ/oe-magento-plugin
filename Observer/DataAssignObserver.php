@@ -41,6 +41,28 @@ class DataAssignObserver extends AbstractDataAssignObserver
                     $additional['selected_bank']
                 );
             }
+
+            // can't use empty here as we need to also catch false
+            if(isset($additional['setup_autopay'])) {
+                $paymentInfo->setAdditionalInformation(
+                    'setup_autopay',
+                    $additional['setup_autopay']
+                );
+            }
+
+            if(!empty($additional['payment_type'])) {
+                $paymentInfo->setAdditionalInformation(
+                    'payment_type',
+                    $additional['payment_type']
+                );
+            }
+
+            if(!empty($additional['selected_agreement'])) {
+                $paymentInfo->setAdditionalInformation(
+                    'selected_agreement',
+                    $additional['selected_agreement']
+                );
+            }
         }
     }
 }

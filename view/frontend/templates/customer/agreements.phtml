@@ -1,0 +1,56 @@
+
+<?php if(!empty($block->getSavedAgreements())): ?>
+    <table class="data-table" id="saved-agreements-table">
+        <thead>
+            <tr>
+                <th><?php echo __("Bank") ?></th>
+                <th><?php echo __("Payer ID") ?></th>
+                <th>&nbsp;</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($block->getSavedAgreements() as $agreement): ?>
+            <tr>
+                <td class="col">
+                    <img src="<?php echo $agreement["logo"] ?>" alt="<?php echo htmlentities($agreement["bank"]) ?>" title="<?php echo htmlentities($agreement["bank"]) ?>" />
+                </td>
+                <td class="col"><?php echo htmlentities($agreement["payer"]) ?></td>
+                <td class="col a-right view">
+                    <a class="delete-paymarkoe-agreement" href="<?php echo $block->escapeUrl($agreement["delete"]) ?>"><?php echo __("Delete") ?></a>
+                </td>
+            </tr>
+        <?php endforeach; ?>
+        </tbody>
+    </table>
+
+    <script>
+        require([
+            'jquery',
+            'Magento_Ui/js/modal/confirm'
+        ], function(jQuery, confirm){
+
+            jQuery('.delete-paymarkoe-agreement').on('click', function (event) {
+                event.preventDefault();
+
+                var url = event.currentTarget.href;
+
+                confirm({
+                    content:  "<?php echo __("Are you sure you want to delete this agreement?") ?>",
+                    actions: {
+                        confirm: function() {
+                            window.location.href = url;
+                        },
+                        cancel: function() {
+                        },
+                        always: function() {
+                        }
+                    }
+                });
+            })
+
+        });
+    </script>
+
+<?php else: ?>
+    <div class="message info empty"><span><?php echo __("You haven't created any Online EFTPOS Agreements") ?></span></div>
+<?php endif; ?>

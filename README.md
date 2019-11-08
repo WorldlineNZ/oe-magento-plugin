@@ -33,7 +33,18 @@ The configuration options are as follows:
 * OE Merhcant ID: Merchant ID for your Online Eftpos account (supplied by Paymark)
 * OE Consumer Key: Consumer Key for your Online Eftpos account (supplied by Paymark)
 * OE Consumer Secret: Consumer Secret for your Online Eftpos account (supplied by Paymark)
+* Allow Autopay: Flag to enable Autopay during checkout
 * UAT: Flag to alternate UAT environment - this changes the payment URL
 * Debug Log: Write logs to paymark.log during the checkout process for debugging purposes
 
 Online Eftpos only supports doing a full Authorise and Capture (no Authorise only).
+
+## Autopay Maintenance Callback
+
+When using Autopay, it is possible that a customer will delete their Autopay contract within thier banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in magento.
+
+```
+https://yourwebsite.url/paymarkoe/maintenance/callback/
+```
+
+This will need to be supplied to Paymark when the account is being setup. 

@@ -25,7 +25,7 @@
             <!--/ko-->
         </div>
 
-        <div class="paymark-oe">
+        <div class="paymark-oe" data-bind="visible: !shouldShowAutopay()">
             <div class="paymark-oe-logo">
                 <img width="160" data-bind="attr: {src: onlineEftposLogo}" />
             </div>
@@ -79,7 +79,7 @@
                         </div>
                     </div>
 
-                    <div class="field checkbox" data-bind="if: (autopayEnabled && autopayAllowed)">
+                    <div class="field checkbox autopay-checkbox" data-bind="if: (autopayEnabled && autopayAllowed)">
 
                         <input type="checkbox"
                                name="payment[paymarkoe_enable_autopay]"
@@ -90,9 +90,14 @@
                                        checked: setupAutoplay" />
 
                         <label data-bind="i18n: 'Enable Autopay', attr: {for: getCode() + '_enable_autopay'}"></label>
+
+                        <a class="whats-autopay"data-bind="
+                                    click: showWhatsAutopay
+                                ">What's Autopay?</a>
                     </div>
                 </form>
             </div>
+
             <div class="paymark-oe-actions">
                 <div class="actions-toolbar">
                     <div class="primary">
@@ -105,9 +110,95 @@
                             <span data-bind="i18n: 'Place Order'"></span>
                         </button>
                     </div>
+
+                    <a class="autopay-switch" data-bind="if: customerHasAgreements(), click: showAutopay">Use Autopay account</a>
+                </div>
+            </div>
+
+            <div id="paymark-oe-what" class="paymark-oe-what">
+                <div class="what-close" data-bind="click: closeWhatsAutopay"></div>
+
+                <div class="what-inner">
+                    <p class="what-title">Autopay</p>
+                    <p>Enabling Autopay allows you to click and buy online straight away with your favourite merchant. You can cancel anytime through your banking app.</p>
+                    <p><a href="https://www.youtube.com/watch?v=C8_FL3xooNs" target="_blank">Click here to learn more.</a> </p>
+                </div>
+
+                <div class="paymark-oe-actions">
+                    <div class="actions-toolbar">
+                        <div class="primary">
+                            <button class="action primary checkout"
+                                data-bind="
+                                    click: closeWhatsAutopay,
+                                    attr: {title: $t('Ok, I understand')}
+                                ">
+                                <span data-bind="i18n: 'Ok, I understand'"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="paymark-oe paymark-oe-autopay" data-bind="visible: shouldShowAutopay()">
+            <div class="paymark-autopay-body">
+                <div class="paymark-oe-logo">
+                    <img width="160" data-bind="attr: {src: onlineEftposLogo}"/>
+                </div>
+                <div class="paymark-oe-fields">
+                    <form id="paymarkoe_autopay_form">
+                        <div class="field autopay-field">
+                            <a class="autopay-edit" href="/paymarkoe/customer/agreements/">Edit</a>
+
+                            <label data-bind="i18n: 'Pay with Autopay Details'"></label>
+
+                            <div class="autopay-list" data-bind="foreach: agreements">
+                                <div class="autopay-option" data-bind="css: {
+                                    'selected':  id == $parent.selectedAgreement()
+                                }">
+                                    <input type="radio"
+                                           class="radio required-entry"
+                                           name="payment[paymarkoe_agreement_id][]"
+                                           data-validate="{'validate-one-required-by-name': true}"
+                                           data-bind="attr:{
+                                                id: 'bank_agreement_' + id,
+                                                value: id
+                                           },
+                                           checked: $parent.selectedAgreement"/>
+
+                                    <label data-bind="attr: {for: 'bank_agreement_' + id}">
+                                        <span class="option-radio"></span>
+                                        <span class="option-payer" data-bind="text: payer"></span>
+                                        <span class="option-logo">
+                                            <img height="18" data-bind="attr: { src: logo }"/>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+                <div class="paymark-oe-actions">
+                    <div class="actions-toolbar">
+                        <div class="primary">
+                            <button class="action primary checkout"
+                                    type="submit"
+                                    data-bind="
+                                        click: placeOrder,
+                                        attr: {title: $t('Pay Now')}
+                                    ">
+                                <span data-bind="i18n: 'Pay Now'"></span>
+                            </button>
+                        </div>
+
+                        <a class="autopay-switch" data-bind="click: closeAutopay">Use another account</a>
+                    </div>
                 </div>
             </div>
         </div>
+
 
         <div id="payment-processing" class="paymark-oe-overlay">
             <div class="paymark-oe-loader">

@@ -9,12 +9,31 @@
 }
 
 .paymark-oe {
+  position: relative;
+
   .paymark-oe-logo {
     margin-bottom: 25px;
   }
 
   .paymark-oe-fields {
     margin-bottom: 16px;
+
+    .whats-autopay, .autopay-edit {
+      float: right;
+      color: #5a3c9f;
+      font-weight: 600;
+      font-size: 13px;
+      line-height: 22px;
+      cursor: pointer;
+
+      &:hover {
+        color: #5a3c9f;
+      }
+    }
+
+    .autopay-edit {
+      text-transform: uppercase;
+    }
 
     .field {
       margin-bottom: 20px;
@@ -139,6 +158,184 @@
         color: #FFFFFF;
         background-color: #5a3c9f;
         border: none;
+      }
+
+      .autopay-switch {
+        text-align: center;
+        padding-top: 20px;
+        display: block;
+        color: #5a3c9f;
+        cursor: pointer;
+
+        &:hover {
+          color: #5a3c9f;
+        }
+      }
+    }
+  }
+
+  .paymark-oe-what {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #5a3c9f;
+    border-radius: 4px;
+    color: #ffffff;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 150ms ease-out;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    &.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .what-close {
+      height: 30px;
+      width: 30px;
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      cursor: pointer;
+
+      &:before, &:after {
+        position: absolute;
+        left: 12px;
+        content: ' ';
+        height: 26px;
+        width: 2px;
+        background-color: #FFFFFF;
+      }
+      &:before {
+        transform: rotate(45deg);
+      }
+      &:after {
+        transform: rotate(-45deg);
+      }
+    }
+
+    .what-inner {
+      padding: 75px 40px 30px;
+
+      a {
+        color: #FFFFFF;
+      }
+    }
+
+    p {
+      font-weight: 200;
+      font-size: 15px;
+    }
+
+    .what-title {
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    .paymark-oe-actions {
+      padding: 20px 20px 30px 20px;
+
+      .actions-toolbar {
+        button {
+          color: #5a3c9f;
+          background-color: #ffffff;
+        }
+      }
+    }
+  }
+}
+
+.paymark-oe-autopay {
+
+  .autopay-list {
+    border: 1px solid #cac8cf;
+    border-radius: 4px;
+  }
+
+  .field {
+    .autopay-option {
+      label {
+        width: 100%;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .autopay-option {
+    padding: 0px 15px;
+    border-bottom: 1px solid #cac8cf;
+    transition: background-color 150ms ease-out;
+
+    &:hover {
+      background-color: #efefef;
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &.selected {
+      .option-radio {
+        &:before {
+          background-color: #5a3c9f;
+        }
+      }
+    }
+
+    input.radio {
+      visibility: hidden;
+      position: absolute;
+      height: 0;
+      width: 0;
+      padding: 0;
+      margin: 0;
+    }
+
+    .option-radio {
+      padding: 4px;
+      border-radius: 50%;
+      border: 1px solid #5a3c9f;
+
+      &:before {
+        width: 8px;
+        height: 8px;
+        content: ' ';
+        display: block;
+        border-radius: 4px;
+        transition: background-color 150ms ease-out;
+      }
+    }
+
+    .option-payer {
+      flex-basis: 50%;
+      padding-left: 15px;
+      line-height: 40px;
+      font-size: 16px;
+      letter-spacing: 2px;
+      color: #605871;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .option-logo {
+      border-left: 1px solid #cac8cf;
+      margin-left: 10px;
+      padding-left: 10px;
+      flex-basis: 29%;
+      display: flex;
+      text-align: center;
+      justify-content: center;
+
+      img {
+        height: 18px;
       }
     }
   }

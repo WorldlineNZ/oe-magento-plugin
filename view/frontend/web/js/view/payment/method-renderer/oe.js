@@ -16,8 +16,8 @@ define(
         'use strict';
 
         var paymarkConfig = window.checkoutConfig.payment.paymarkoe;
-        var availBanks = [];
 
+        var availBanks = [];
         $.each(paymarkConfig.available_banks, function (id, values) {
             availBanks.push({
                 value: id,
@@ -26,6 +26,17 @@ define(
                 logo: values.logo
             })
         });
+
+        var agreements = [];
+        if(paymarkConfig.allow_autopay) {
+            $.each(paymarkConfig.agreements, function (id, values) {
+                agreements.push({
+                    id: id,
+                    payer: values.payer,
+                    logo: paymarkConfig.bank_logos[values.bank]
+                })
+            });
+        }
 
         var defaultPhone = null;
 
@@ -46,9 +57,23 @@ define(
         var autopayBanks = paymarkConfig.autopay_banks;
         var bankLogos = paymarkConfig.bank_logos;
 
+        var paymentType = ko.observable(paymarkConfig.type_standard);
+        var selectedAgreement = ko.observable();
+        var customerHasAgreements = ko.observable(false);
+
         var loadingBankName = ko.observable();
         var loadingBankImage = ko.computed(function(){
-            return paymarkConfig.popup_images[selectedBank()];
+            var image = '';
+            if(paymentType() == paymarkConfig.type_autopay) {
+                if(selectedAgreement()) {
+                    var bankId = paymarkConfig.agreements[selectedAgreement()].bank;
+                    image = paymarkConfig.popup_images[bankId];
+                }
+            } else {
+                image = paymarkConfig.popup_images[selectedBank()];
+            }
+
+            return image;
         }, self);
 
         var bankChanged = function() {
@@ -87,11 +112,22 @@ define(
             $.validator.addMethod.apply($.validator, rule);
         });
 
+        if(paymarkConfig.allow_autopay && agreements.length) {
+            paymentType(paymarkConfig.type_autopay);
+            selectedAgreement(agreements[0].id);
+            customerHasAgreements(true);
+        }
+
+        var shouldShowAutopay = ko.computed(function() {
+            return (paymarkConfig.allow_autopay && paymentType() == paymarkConfig.type_autopay)
+        });
+
         return Component.extend({
             mobileNumber: mobileNumber,
             selectedBank: selectedBank,
 
             formSelector: '#paymarkoe_form',
+            formAutopaySelector: '#paymarkoe_autopay_form',
 
             onlineEftposLogo: paymarkConfig.logo,
             availableBanks: availBanks,
@@ -99,10 +135,17 @@ define(
             autopayAllowed: autopayAllowed,
             setupAutoplay: setupAutoplay,
             bankLogos: bankLogos,
+            agreements: agreements,
+
+            paymentType: paymentType,
+            selectedAgreement: selectedAgreement,
+            shouldShowAutopay: shouldShowAutopay,
+            customerHasAgreements: customerHasAgreements,
 
             loadingBankName: loadingBankName,
             loadingBankImage: loadingBankImage,
             processingScreen: '#payment-processing',
+            whatsAutopayOverlay: '#paymark-oe-what',
             countdownTimer: '.oe-loader-timer',
             timerInterval: null,
 
@@ -116,7 +159,10 @@ define(
                 this._super()
                     .observe([
                         'mobileNumber',
-                        'selectedBank'
+                        'selectedBank',
+                        'setupAutoplay',
+                        'paymentType',
+                        'selectedAgreement'
                     ]);
                 return this;
             },
@@ -131,13 +177,16 @@ define(
                     'additional_data': {
                         'selected_bank': this.selectedBank(),
                         'mobile_number': this.mobileNumber(),
-                        'setup_autopay': this.setupAutoplay()
+                        'setup_autopay': this.setupAutoplay(),
+                        'payment_type': this.paymentType(),
+                        'selected_agreement': this.selectedAgreement()
                     }
                 };
             },
 
             validate: function () {
-                return $(this.formSelector).validation() && $(this.formSelector).validation('isValid');
+                var formSelector = this.paymentType() == paymarkConfig.type_autopay ? this.formAutopaySelector : this.formSelector;
+                return $(formSelector).validation() && $(formSelector).validation('isValid');
             },
 
             afterPlaceOrder: function() {
@@ -183,6 +232,22 @@ define(
             resetCountdownTimer: function () {
                 $(this.countdownTimer).text('5:00');
                 clearInterval(this.timerInterval);
+            },
+
+            showWhatsAutopay: function () {
+                $(this.whatsAutopayOverlay).addClass('show');
+            },
+
+            closeWhatsAutopay: function () {
+                $(this.whatsAutopayOverlay).removeClass('show');
+            },
+
+            showAutopay: function() {
+                this.paymentType(paymarkConfig.type_autopay)
+            },
+
+            closeAutopay: function () {
+                this.paymentType(paymarkConfig.type_standard)
             }
         });
     }

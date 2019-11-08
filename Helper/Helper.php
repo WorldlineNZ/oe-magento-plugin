@@ -6,6 +6,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\ScopeInterface;
+use Onfire\PaymarkOE\Model\OnlineEftposApi;
 
 class Helper
 {
@@ -62,8 +63,11 @@ class Helper
 
     const RESULT_FAILED = 'failed';
 
+    const AUTOPAY_APPROVED = 'APPROVED';
+
     /**
      * Helper constructor.
+     *
      * @param ScopeConfigInterface $scopeConfig
      * @param HistoryFactory $orderHistoryFactory
      * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
@@ -124,7 +128,6 @@ class Helper
         );
     }
 
-
     /**
      * Get order by increment id
      *
@@ -150,6 +153,7 @@ class Helper
         $additionalInfo = $payment->getAdditionalInformation();
         return !empty($additionalInfo["TransactionID"]) ? $additionalInfo["TransactionID"] : null;
     }
+
 
     /**
      * Check transaction status and update order if accepted/declined
@@ -210,6 +214,8 @@ class Helper
 
                 $this->log(__METHOD__. " " . $incrementId . " set payment info back on order");
 
+                $this->_saveAutopayToken($transaction, $order);
+
                 $this->sendOrderEmail($order);
 
                 return self::RESULT_SUCCESS;
@@ -230,6 +236,36 @@ class Helper
             return self::RESULT_FAILED;
         }
 
+    }
+
+    /**
+     * If the autopay trustId is present in the response, save it into the vault
+     *
+     * @param $transaction
+     * @param $order
+     * @return bool
+     */
+    private function _saveAutopayToken($transaction, $order)
+    {
+        if (empty($transaction->trust) ||
+            $transaction->trust->trustPaymentStatus != self::AUTOPAY_APPROVED ||
+            $transaction->transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
+        ) {
+            return false;
+        }
+
+        $agreementHelper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\AgreementHelper");
+
+        $agreement = $agreementHelper->createCustomerAgreement(
+            $order->getCustomerId(),
+            $transaction->trust->id,
+            $transaction->bank->payerId,
+            $transaction->bank->bankId
+        );
+
+        $this->log(__METHOD__ . " autopay agreement created successfully");
+
+        return $agreement;
     }
 
     /**

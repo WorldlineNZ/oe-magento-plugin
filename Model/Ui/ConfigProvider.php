@@ -30,7 +30,14 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     private $_helper;
 
+    /**
+     * @var \Onfire\PaymarkOE\Helper\AgreementHelper
+     */
+    private $_agreementHelper;
+
     const CODE = 'paymarkoe';
+
+    const VAULT_CODE = 'paymarkoe_vault';
 
     /**
      * All bank details
@@ -65,9 +72,13 @@ final class ConfigProvider implements ConfigProviderInterface
     /**
      * Banks that are allowed to use Autopay
      */
-    CONST AUTOPAY_BANKS = [
+    const AUTOPAY_BANKS = [
         'ASB'
     ];
+
+    const TYPE_STANDARD = 'standard';
+
+    const TYPE_AUTOPAY = 'autopay';
 
     /**
      * ConfigProvider constructor.
@@ -89,6 +100,8 @@ final class ConfigProvider implements ConfigProviderInterface
         $this->_session = $session;
 
         $this->_helper = $this->_objectManager->get('\Onfire\PaymarkOE\Helper\Helper');
+
+        $this->_agreementHelper = $this->_objectManager->get('\Onfire\PaymarkOE\Helper\AgreementHelper');
     }
 
     /**
@@ -108,7 +121,10 @@ final class ConfigProvider implements ConfigProviderInterface
                     'autopay_banks' => self::AUTOPAY_BANKS,
                     'logo' => $this->getOnlineEftposLogo(),
                     'bank_logos' => $this->getLogoImages(),
-                    'popup_images' => $this->getPopupImages()
+                    'popup_images' => $this->getPopupImages(),
+                    'agreements' => $this->getAgreements(),
+                    'type_standard' => self::TYPE_STANDARD,
+                    'type_autopay' => self::TYPE_AUTOPAY
                 ]
             ]
         ];
@@ -155,6 +171,29 @@ final class ConfigProvider implements ConfigProviderInterface
         }
 
         return $images;
+    }
+
+    /**
+     * Get agreements available for frontend
+     *
+     * @return array
+     */
+    public function getAgreements()
+    {
+        $agreements = $this->_agreementHelper->getCustomerAgreements($this->_session->getCustomerId());
+        $list = [];
+
+        foreach ($agreements as $agreement) {
+            $details = json_decode($agreement->getTokenDetails());
+
+            $list[$agreement->getEntityId()] = [
+                'id' => $agreement->getEntityId(),
+                'bank' => $details->bank,
+                'payer' => $details->payer
+            ];
+        }
+
+        return $list;
     }
 
     /**

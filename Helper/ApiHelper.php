@@ -5,6 +5,9 @@ namespace Onfire\PaymarkOE\Helper;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Onfire\PaymarkOE\Exception\ApiConflictException;
+use Onfire\PaymarkOE\Model\OnlineEftposApi;
+use Onfire\PaymarkOE\Model\Ui\ConfigProvider;
 
 class ApiHelper extends AbstractHelper
 {
@@ -45,9 +48,6 @@ class ApiHelper extends AbstractHelper
         $this->_helper = $this->_objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
 
         $this->_paymarkApi = $this->_objectManager->create("\Onfire\PaymarkOE\Model\OnlineEftposApi");
-
-        // 'login' to Paymark API to create access_token
-        $this->_paymarkApi->login();
     }
 
     /**
@@ -67,9 +67,19 @@ class ApiHelper extends AbstractHelper
 
         $paymentInformation = $payment->getAdditionalInformation();
 
-        if(empty($paymentInformation['mobile_number']) || empty($paymentInformation['selected_bank'])) {
+        $paymentType = !empty($paymentInformation['payment_type']) ? $paymentInformation['payment_type'] : ConfigProvider::TYPE_STANDARD;
+        if($paymentType == ConfigProvider::TYPE_AUTOPAY && empty($paymentInformation['selected_agreement'])) {
+
+            // doing auto payment but the agreement is not selected
+            $this->_helper->log(__METHOD__ . " Selected agreement missing for order " . $order->getIncrementId());
+            throw new LocalizedException(__("Autopay agreement missing for order - please try again."));
+
+        } else if($paymentType == ConfigProvider::TYPE_STANDARD && (empty($paymentInformation['mobile_number']) || empty($paymentInformation['selected_bank']))) {
+
+            // doing normal payment but the mobile or bank is missing
             $this->_helper->log(__METHOD__ . " Mobile number or bank missing for order " . $order->getIncrementId());
             throw new LocalizedException(__("Mobile number or bank missing - please try again."));
+
         }
 
         try {
@@ -85,6 +95,28 @@ class ApiHelper extends AbstractHelper
 
             $reference = $this->getStoreName() . ' OE Payment';
 
+            $transactionType = OnlineEftposApi::TYPE_REGULAR;
+            if ($paymentType == ConfigProvider::TYPE_AUTOPAY) {
+                // if payment type uses autopay, find the token
+
+                $agreementHelper = $this->_objectManager->create("\Onfire\PaymarkOE\Helper\AgreementHelper");
+                $agreement = $agreementHelper->getAgreementById($paymentInformation['selected_agreement']);
+                if($agreement->getCustomerId() !== $order->getCustomerId()) {
+                    throw new LocalizedException(__("Agreement is not under the order customer account."));
+                }
+
+                // set payment details based on token instead
+                $agreementDetails = json_decode($agreement->getTokenDetails());
+                $paymentInformation['mobile_number'] = $agreementDetails->payer;
+                $paymentInformation['selected_bank'] = $agreementDetails->bank;
+
+                $transactionType = OnlineEftposApi::TYPE_TRUSTED;
+
+            } elseif (!empty($paymentInformation['setup_autopay']) && $paymentInformation['setup_autopay']) {
+                $transactionType = OnlineEftposApi::TYPE_TRUSTSETUP;
+            }
+
+            $this->_paymarkApi->login();
             $transaction = $this->_paymarkApi->createTransaction(
                 $order->getIncrementId(),
                 $total,
@@ -93,11 +125,17 @@ class ApiHelper extends AbstractHelper
                 $paymentInformation['selected_bank'],
                 $reference,
                 $this->getStoreUrl(),
-                $callback
+                $callback,
+                $transactionType
             );
 
             $this->_helper->log(__METHOD__ . " Request created with ID " . $transaction->id);
 
+        } catch (ApiConflictException $e) {
+            $this->_helper->log(__METHOD__ . " Failed to generate payment request");
+            $this->_helper->log($e->getMessage());
+
+            throw new LocalizedException(__($e->getMessage()));
         } catch (\Exception $e) {
             $this->_helper->log(__METHOD__ . " Failed to generate payment request");
             $this->_helper->log($e->getMessage());
@@ -123,7 +161,6 @@ class ApiHelper extends AbstractHelper
         return $transaction->id;
     }
 
-
     /**
      * Find transaction at Paymark using the $transactionId
      *
@@ -134,6 +171,7 @@ class ApiHelper extends AbstractHelper
     public function findTransaction($transactionId)
     {
         try {
+            $this->_paymarkApi->login();
             $transaction = $this->_paymarkApi->getTransaction($transactionId);
         } catch (\Exception $e) {
             $this->_helper->log(__METHOD__ . " Failed to find payment request for id " . $transactionId);
@@ -143,6 +181,19 @@ class ApiHelper extends AbstractHelper
         }
 
         return $transaction;
+    }
+
+    /**
+     * Delete autopay trust contract, using Paymark UUID
+     *
+     * @param $autopayId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function deleteAutopay($autopayId)
+    {
+        $this->_paymarkApi->login();
+        return $this->_paymarkApi->deleteAutopayContract($autopayId);
     }
 
     /**
