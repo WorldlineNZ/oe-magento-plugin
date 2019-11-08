@@ -66,7 +66,7 @@ class InitializeCommand implements CommandInterface
 
         try {
             // check if the payment is already complete
-            $result = $helper->checkTransactionAndProcess($apiHelper->findTransaction($transactionId));
+            $result = $helper->checkTransactionAndProcess($apiHelper->findTransaction($transactionId), $orderState);
 
             if($result && $result == Helper::RESULT_FAILED) {
                 throw new \Exception('Payment was declined');

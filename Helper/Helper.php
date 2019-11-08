@@ -159,9 +159,10 @@ class Helper
      * Check transaction status and update order if accepted/declined
      *
      * @param $transaction
+     * @param null $orderState
      * @return bool
      */
-    public function checkTransactionAndProcess($transaction)
+    public function checkTransactionAndProcess($transaction, $orderState = null)
     {
         $this->log(__METHOD__. " check transaction");
 
@@ -175,16 +176,17 @@ class Helper
             return false;
         }
 
-        return $this->processTransaction($transaction);
+        return $this->processTransaction($transaction, $orderState);
     }
 
     /**
      * Process response from Paymark, updating order as required
      *
      * @param $transaction
+     * @param null $orderState
      * @return bool
      */
-    public function processTransaction($transaction) {
+    public function processTransaction($transaction, $orderState = null) {
         $this->log(__METHOD__. " handle transaction");
 
         $incrementId = $transaction->transaction->orderId;
@@ -206,7 +208,7 @@ class Helper
                 // payment completed
                 $this->log(__METHOD__. " " . $incrementId . " order status complete");
 
-                $this->_orderSuccess($order, $payment, $transaction);
+                $this->_orderSuccess($order, $payment, $transaction, $orderState);
 
                 $this->log(__METHOD__. " " . $incrementId . " payment complete");
 
@@ -292,10 +294,11 @@ class Helper
      * @param \Magento\Sales\Model\Order $order
      * @param \Magento\Sales\Model\Order\Payment $payment
      * @param $transaction
+     * @param null $orderState
      * @return \Magento\Sales\Model\Order
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function _orderSuccess(\Magento\Sales\Model\Order $order, \Magento\Sales\Model\Order\Payment $payment, $transaction)
+    private function _orderSuccess(\Magento\Sales\Model\Order $order, \Magento\Sales\Model\Order\Payment $payment, $transaction, $orderState = null)
     {
         $transID = $transaction->id;
         $amount = bcdiv($transaction->transaction->amount, 100); //convert back to decimal
@@ -308,6 +311,11 @@ class Helper
 
         $order->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
         $order->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+
+        if($orderState) {
+            $orderState->setState(\Magento\Sales\Model\Order::STATE_PROCESSING);
+            $orderState->setStatus(\Magento\Sales\Model\Order::STATE_PROCESSING);
+        }
 
         $invoice->setTransactionId($transID);
         $invoice->register()->pay()->save();
