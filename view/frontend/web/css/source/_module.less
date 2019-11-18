@@ -91,7 +91,6 @@
     }
 
     .bank-select {
-      border: 1px solid #cac8cf;
       border-radius: 4px;
       display: flex;
 
@@ -102,10 +101,28 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        border-right: 1px solid #cac8cf;
+        border-top: 1px solid #cac8cf;
+        border-bottom: 1px solid #cac8cf;
+        border-left: 1px solid #cac8cf;
+        transition: background-color 150ms ease-out, border 150ms ease-out;
+
+        &:first-child {
+          border-radius:4px 0 0 4px;
+          border-left: 1px solid #cac8cf;
+        }
 
         &:last-child {
-          border: none;
+          border-radius:0 4px 4px 0;
+          border-right: 1px solid #cac8cf;
+        }
+
+        &:hover {
+          background-color: #efefef;
+          border-color: #5a3c9f;
+
+          + .bank-select-input {
+            border-left-color: #5a3c9f;
+          }
         }
 
         label {
