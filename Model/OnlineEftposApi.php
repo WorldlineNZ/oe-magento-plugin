@@ -272,7 +272,8 @@ class OnlineEftposApi
                 return $responseData;
 
             case 409:
-                throw new ApiConflictException($responseData->error, $response->getStatusCode());
+                $message = !empty($responseData->error) ? $responseData->error : 'Conflict error while processing';
+                throw new ApiConflictException($message, $response->getStatusCode());
 
             default:
                 if(!empty($responseData->error_description)) {
