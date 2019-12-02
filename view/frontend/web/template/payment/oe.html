@@ -54,7 +54,9 @@
                                            checked: $parent.selectedBank"/>
 
                                     <label data-bind="attr: {for: 'bank_id_' + value}">
-                                        <img height="40" data-bind="attr: { src: $parent.getLogoImage(value) }" />
+                                        <span class="bank-select-logo">
+                                            <img data-bind="attr: { src: $parent.getLogoImage(value) }" />
+                                        </span>
                                     </label>
                                 </div>
                             </div>

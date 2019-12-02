@@ -151,7 +151,7 @@ final class ConfigProvider implements ConfigProviderInterface
         $images = [];
 
         foreach(self::BANKS as $key => $value) {
-            $images[$key] = $this->getImagePath($value['logo']);
+            $images[$key] = $this->getImagePath($value['logo'] . ".svg");
         }
 
         return $images;
@@ -167,7 +167,7 @@ final class ConfigProvider implements ConfigProviderInterface
         $images = [];
 
         foreach(self::BANKS as $key => $value) {
-            $images[$key] = $this->getImagePath($value['image']);
+            $images[$key] = $this->getImagePath($value['image'] . ".png");
         }
 
         return $images;
@@ -204,6 +204,6 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     private function getImagePath($image)
     {
-        return $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/" . $image . ".png");
+        return $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/" . $image);
     }
 }
