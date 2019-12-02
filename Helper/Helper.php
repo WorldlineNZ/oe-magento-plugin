@@ -6,6 +6,7 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Sales\Model\Order;
 use Onfire\PaymarkOE\Model\OnlineEftposApi;
 
 class Helper
@@ -148,12 +149,49 @@ class Helper
      * @param $order
      * @return null
      */
-    public function getTransactionIdFromOrder($order) {
+    public function getTransactionIdFromOrder($order)
+    {
         $payment = $order->getPayment();
         $additionalInfo = $payment->getAdditionalInformation();
         return !empty($additionalInfo["TransactionID"]) ? $additionalInfo["TransactionID"] : null;
     }
 
+    /**
+     * Process the order
+     *
+     * @param $order
+     * @param bool $query
+     * @return bool
+     */
+    public function processOrder($order, $query = true)
+    {
+        $logPrepend = $query ? '(query)' : '(callback)';
+        $apiHelper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\ApiHelper");
+
+        // if already completed for whatever reason, just stop
+        if($order->getState() == Order::STATE_PROCESSING || $order->getState() == Order::STATE_CANCELED) {
+            $this->log(__METHOD__. " " . $logPrepend . " order already completed or cancelled " . $order->getEntityId());
+            return false;
+        }
+
+        if(!($transactionId = $this->getTransactionIdFromOrder($order))) {
+            //something has gone wrong
+            $this->log(__METHOD__. " " . $logPrepend . " transaction id not found " . $order->getEntityId());
+            return false;
+        }
+
+        $this->log(__METHOD__ . " " . $logPrepend . " order found");
+
+        $transaction = $apiHelper->findTransaction($transactionId);
+
+        $this->log(__METHOD__ . " " . $logPrepend . " check and process transaction");
+
+        $result = $this->checkTransactionAndProcess($transaction);
+
+        $this->log(__METHOD__ . " " . $logPrepend . " process transaction result: " . $result);
+
+        return $result;
+    }
 
     /**
      * Check transaction status and update order if accepted/declined

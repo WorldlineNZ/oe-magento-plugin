@@ -41,7 +41,7 @@ class QueryManagement
     }
 
     /**
-     * Get Paymark transaction status and return url for the user to redirect to
+     * Get Paymark transaction status and return order status to frontend
      *
      * @return array|mixed|string
      */
@@ -49,6 +49,31 @@ class QueryManagement
     {
         $order = $this->_checkoutSession->getLastRealOrder();
 
+        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+        $helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+
+        if(!$order) {
+            $helper->log(__METHOD__. " no last order?");
+        }
+
+        // double check order to see if it's already completed
+        if($response = $this->handleResponse($order)) {
+            return $response;
+        }
+
+        $order = $helper->getOrderByIncrementId($order->getIncrementId());
+        $helper->processOrder($order);
+
+        return $this->handleResponse($order);
+    }
+
+    /**
+     * Handle order response to client
+     *
+     * @param $order
+     * @return bool|false|string
+     */
+    private function handleResponse($order) {
         switch ($order->getState()) {
             case Order::STATE_PROCESSING:
                 return json_encode([
@@ -73,6 +98,8 @@ class QueryManagement
                 // if pending - wait
                 break;
         }
+
+        return false;
     }
 
     /**
