@@ -23,7 +23,8 @@ define(
                 value: id,
                 text: values.title,
                 short: values.short,
-                logo: values.logo
+                logo: values.logo,
+                lower: id.toLowerCase()
             })
         });
 
