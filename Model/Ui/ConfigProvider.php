@@ -137,7 +137,7 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     public function getOnlineEftposLogo()
     {
-        $url =  $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/logo.png");;
+        $url =  $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/logo.svg");;
         return $url;
     }
 

@@ -169,7 +169,7 @@ class Helper
         $apiHelper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\ApiHelper");
 
         // if already completed for whatever reason, just stop
-        if($order->getState() == Order::STATE_PROCESSING || $order->getState() == Order::STATE_CANCELED) {
+        if(in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
             $this->log(__METHOD__. " " . $logPrepend . " order already completed or cancelled " . $order->getEntityId());
             return false;
         }

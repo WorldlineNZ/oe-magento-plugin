@@ -76,6 +76,7 @@ class QueryManagement
     private function handleResponse($order) {
         switch ($order->getState()) {
             case Order::STATE_PROCESSING:
+            case Order::STATE_COMPLETE:
                 return json_encode([
                     'status' => 'success',
                     'redirect' => $this->_urlInterface->getUrl("checkout/onepage/success", [
