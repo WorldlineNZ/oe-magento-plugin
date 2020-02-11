@@ -41,6 +41,10 @@ class Delete extends \Magento\Framework\App\Action\Action
 
     public function execute()
     {
+        if (!$this->_customerSession->isLoggedIn()) {
+            return $this->_redirect('customer/account/login');
+        }
+
         $agreementId = $this->getRequest()->getParam("id");
         $customerId = $this->_customerSession->getCustomerId();
 

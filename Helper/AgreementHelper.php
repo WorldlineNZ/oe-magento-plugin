@@ -174,6 +174,10 @@ class AgreementHelper
             throw new LocalizedException(__('Agreement does not belong to this user'));
         }
 
+        if(!$token->getIsActive()) {
+            throw new LocalizedException(__('Agreement inactive'));
+        }
+
         try {
             //delete remote agreement
             $this->_apiHelper->deleteAutopay($token->getGatewayToken());

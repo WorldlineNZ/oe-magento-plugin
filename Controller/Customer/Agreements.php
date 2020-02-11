@@ -28,20 +28,12 @@ class Agreements extends \Magento\Framework\App\Action\Action
         $this->customerSession = $this->_objectManager->get('\Magento\Customer\Model\Session');
     }
 
-    /**
-     * Redirect to login if no user session
-     */
-    private function checkLoggedIn()
-    {
-        if (!$this->customerSession->isLoggedIn()) {
-            $this->_redirect('customer/account/login');
-        }
-    }
-
     public function execute()
     {
         // redirect if not logged in
-        $this->checkLoggedIn();
+        if (!$this->customerSession->isLoggedIn()) {
+            return $this->_redirect('customer/account/login');
+        }
 
         $resultPage = $this->resultPageFactory->create();
 
