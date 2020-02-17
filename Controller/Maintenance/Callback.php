@@ -42,9 +42,13 @@ class Callback extends \Magento\Framework\App\Action\Action implements CsrfAware
         }
 
         // confirm signature is correct
-        $signature = base64_encode('oeTrustId=' . $params['oeTrustId'] . '&oeTrustStatus=' . $params['oeTrustStatus']);
-        if($signature !== $params['signature']) {
-            $helper->log(__METHOD__ . " callback signature does not match");
+        $valid = $helper->validateSignature([
+            'oeTrustId' => $params['oeTrustId'],
+            'oeTrustStatus' => $params['oeTrustStatus']
+        ], $params['signature']);
+
+        if(!$valid) {
+            $helper->log(__METHOD__. " signature validation failed for maintenance/callback with trust id: " . $params['oeTrustId']);
             return false;
         }
 

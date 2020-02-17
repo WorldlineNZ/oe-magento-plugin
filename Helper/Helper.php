@@ -4,10 +4,14 @@ namespace Onfire\PaymarkOE\Helper;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
+use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Component\ComponentRegistrarInterface;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Sales\Model\Order;
 use Onfire\PaymarkOE\Model\OnlineEftposApi;
+use Magento\Sales\Model\Order\Email\Sender\OrderSender;
+use Magento\Quote\Api\CartRepositoryInterface;
 
 class Helper
 {
@@ -48,9 +52,16 @@ class Helper
     private $_quoteRepository;
 
     /**
+     * @var ComponentRegistrarInterface
+     */
+    private $_componentRegistrar;
+
+    /**
      * @var \Onfire\PaymarkOE\Logger\PaymentLogger
      */
     private $_logger;
+
+    const MODULE_NAME = 'Onfire_PaymarkOE';
 
     const CONFIG_PREFIX = 'payment/paymarkoe/';
 
@@ -66,19 +77,25 @@ class Helper
 
     const AUTOPAY_APPROVED = 'APPROVED';
 
+    const SIGNING_PROD = 'production.pem';
+
+    const SIGNING_DEV = 'sandbox.pem';
+
     /**
      * Helper constructor.
      *
      * @param ScopeConfigInterface $scopeConfig
      * @param HistoryFactory $orderHistoryFactory
-     * @param \Magento\Quote\Api\CartRepositoryInterface $quoteRepository
-     * @param \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
+     * @param CartRepositoryInterface $quoteRepository
+     * @param OrderSender $orderSender
+     * @param ComponentRegistrarInterface $componentRegistrar
      */
     public function __construct(
         ScopeConfigInterface $scopeConfig,
         HistoryFactory $orderHistoryFactory,
-        \Magento\Quote\Api\CartRepositoryInterface $quoteRepository,
-        \Magento\Sales\Model\Order\Email\Sender\OrderSender $orderSender
+        CartRepositoryInterface $quoteRepository,
+        OrderSender $orderSender,
+        ComponentRegistrarInterface $componentRegistrar
     )
     {
         $this->_config = $scopeConfig;
@@ -90,6 +107,8 @@ class Helper
         $this->_objectManager = ObjectManager::getInstance();
 
         $this->_quoteRepository = $quoteRepository;
+
+        $this->_componentRegistrar = $componentRegistrar;
 
         $this->_transactionBuilder = $this->_objectManager->get('\Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface');
 
@@ -127,6 +146,77 @@ class Helper
             self::CONFIG_PREFIX . $path,
             ScopeInterface::SCOPE_STORE
         );
+    }
+
+    /**
+     * Return true if the module is in prod mode
+     *
+     * @return bool
+     */
+    public function isProdMode()
+    {
+        return $this->getConfig('debug') == 0 ? true : false;
+    }
+
+    /**
+     * Validate request signature
+     *
+     * @param array $pieces
+     * @param $signature
+     * @param string $algorithm
+     * @return bool
+     */
+    public function validateSignature($pieces, $signature, $algorithm = 'SHA512')
+    {
+        $verify = openssl_verify(http_build_query($pieces), base64_decode($signature), $this->getKeyResource(), $algorithm);
+
+        return $verify == 1;
+    }
+
+    /**
+     * Get public key resource
+     *
+     * @return resource
+     */
+    private function getKeyResource()
+    {
+        $keyContent = file_get_contents($this->getKeyPath($this->getSigningKey()));
+        return openssl_pkey_get_public($keyContent);
+    }
+
+    /**
+     * Find full key path
+     *
+     * @param $filename
+     * @param string $folder
+     * @return string
+     */
+    public function getKeyPath($filename, $folder = 'keys')
+    {
+        return implode('/', [
+            $this->getModulePath(),
+            $folder,
+            $filename
+        ]);
+    }
+
+    /**
+     * Get the full path of this module
+     * @return string
+     */
+    public function getModulePath()
+    {
+        return $this->_componentRegistrar->getPath(ComponentRegistrar::MODULE, self::MODULE_NAME);
+    }
+
+    /**
+     * Get current signing key by prod/dev mode
+     *
+     * @return string
+     */
+    private function getSigningKey()
+    {
+        return $this->isProdMode() ? self::SIGNING_PROD : self::SIGNING_DEV;
     }
 
     /**

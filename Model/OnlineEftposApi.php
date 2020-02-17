@@ -104,7 +104,7 @@ class OnlineEftposApi
 
         $this->_helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
 
-        $this->_prod = $this->_helper->getConfig('debug') == 0 ? true : false;
+        $this->_prod = $this->_helper->isProdMode();
 
         $this->_merchantId = $this->_helper->getConfig('merchant_id');
 

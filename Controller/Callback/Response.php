@@ -41,6 +41,18 @@ class Response extends \Magento\Framework\App\Action\Action implements CsrfAware
             return false;
         }
 
+        // confirm signature is correct
+        $valid = $helper->validateSignature([
+            'merchantOrderId' => $params['merchantOrderId'],
+            'status' => $params['status'],
+            'transactionId' => $params['transactionId']
+        ], $params['signature']);
+
+        if(!$valid) {
+            $helper->log(__METHOD__. " signature validation failed for callback/response with order id: " . $params['orderId']);
+            return false;
+        }
+
         $order = $helper->getOrderByIncrementId($params['orderId']);
         $helper->processOrder($order, false);
     }
