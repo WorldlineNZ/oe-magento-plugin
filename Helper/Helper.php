@@ -328,6 +328,14 @@ class Helper
             return false;
         }
 
+        $originalAmount = bcmul($order->getBaseGrandTotal(), 100);
+        $transactAmount = $transaction->transaction->amount;
+        if($transactAmount != $originalAmount) {
+            //transaction value has been modified
+            $this->log(__METHOD__. " transaction amount doesn't match original order amount: " . $incrementId);
+            return false;
+        }
+
         // grab payment object from order
         $payment = $order->getPayment();
 

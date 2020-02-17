@@ -23,7 +23,7 @@ class Callback extends \Magento\Framework\App\Action\Action implements CsrfAware
     /**
      * Handle maintenance callback response from Paymark
      *
-     * @return \Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface|void
+     * @return bool|\Magento\Framework\App\ResponseInterface|\Magento\Framework\Controller\ResultInterface
      */
     public function execute()
     {
