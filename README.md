@@ -11,6 +11,8 @@ To install this module use the following composer command:
 
 Alternatively download the package and put the files into this folder in your Magento directory: `app/Onfire/PaymarkOE`
 
+Note: If you do not use Composer you will not receive automatic updates.  Please use your GitHub account to subscribe to the plugin repository so you are alerted to updates.
+
 After installing the files please run the following commands to enable the module:
 
 ```
