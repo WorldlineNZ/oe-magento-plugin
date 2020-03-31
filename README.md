@@ -23,7 +23,7 @@ php bin/magento module:enable Onfire_PaymarkOE
 php bin/magento setup:upgrade
 ```
 
-## Config
+## Configuration
 
 You will need to have an Online EFTPOS account before configuring this module. Visit https://www.paymark.co.nz/products/online-eftpos/ for more info.
 
