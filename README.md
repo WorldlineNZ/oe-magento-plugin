@@ -1,5 +1,5 @@
 # Paymark payment module for Magento 2.x
-This is a Paymark Online EFTPOS payment module for Magento 2. 
+This is a Paymark Online EFTPOS payment module for Magento 2. Please read this file carefully and follow all instructions to install and configure the payment module successfully.
 
 Tested on Magento 2.3.x only.
 
@@ -11,7 +11,7 @@ To install this module use the following composer command:
 
 Alternatively download the package and put the files into this folder in your Magento directory: `app/Onfire/PaymarkOE`
 
-Note: If you do not use Composer you will not receive automatic updates.  Please use your GitHub account to subscribe to the plugin repository so you are alerted to updates.
+Note: If you do not use Composer you will not receive automatic updates.  Please use your GitHub account to subscribe to the payment module repository so you are alerted to updates.
 
 After installing the files please run the following commands to enable the module:
 
