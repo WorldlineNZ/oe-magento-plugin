@@ -23,28 +23,28 @@ php bin/magento setup:upgrade
 
 ## Config
 
-You will need to register for Online EFTPOS before configuring this module. Visit www.paymark.co.nz for more info.
+You will need to have an Online EFTPOS account before configuring this module. Visit https://www.paymark.co.nz/products/online-eftpos/ for more info.
 
 After the module has been installed go to `Stores > Settings > Configuration > Sales > Payment Methods` in the Magento Admin to find the configuration options.
 
 The configuration options are as follows:
 
 * Title: Title that will appear on the checkout page
-* OE Merhcant ID: Merchant ID for your Online Eftpos account (supplied by Paymark)
-* OE Consumer Key: Consumer Key for your Online Eftpos account (supplied by Paymark)
-* OE Consumer Secret: Consumer Secret for your Online Eftpos account (supplied by Paymark)
-* Allow Autopay: Flag to enable Autopay during checkout
-* UAT: Flag to alternate UAT environment - this changes the payment URL
+* OE Merchant ID: Merchant ID for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* OE Consumer Key: Consumer Key for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* OE Consumer Secret: Consumer Secret for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* Allow Autopay: Flag to enable Autopay during checkout, contact Paymark if you wish to enable Autopay
+* UAT: Flag to change the payment URL to connect to the Online EFTPOS Sandbox environment for testing purposes
 * Debug Log: Write logs to paymark.log during the checkout process for debugging purposes
-
-Online Eftpos only supports doing a full Authorise and Capture (no Authorise only).
 
 ## Autopay Maintenance Callback
 
-When using Autopay, it is possible that a customer will delete their Autopay contract within thier banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in magento.
+This applies if you have Autopay enabled on your account.  Contact Paymark on 0800 PAYMARK to discuss using Autopay.
+
+When using Autopay, it is possible that a customer will delete their Autopay contract within their banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in Magento.
 
 ```
 https://yourwebsite.url/paymarkoe/maintenance/callback/
 ```
 
-This will need to be supplied to Paymark when the account is being setup. 
+This URL will need to be supplied to Paymark when the account is being set up. 
