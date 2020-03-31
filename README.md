@@ -34,7 +34,7 @@ The configuration options are as follows:
 * OE Consumer Key: Consumer Key for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
 * OE Consumer Secret: Consumer Secret for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
 * Allow Autopay: Flag to enable Autopay during checkout, contact Paymark if you wish to enable Autopay
-* UAT: Flag to change the payment URL to connect to the Online EFTPOS Sandbox environment for testing purposes
+* UAT: Flag to change the payment URL to connect to the Online EFTPOS Sandbox environment for testing purposes, you will need to use the Merchant ID and Consumer Key/Secret for your Online EFTPOS Sandbox account (https://oe.demo.paymark.co.nz/) when using this setting
 * Debug Log: Write logs to paymark.log during the checkout process for debugging purposes
 
 ## Autopay Maintenance Callback
