@@ -1,5 +1,5 @@
 # Paymark payment module for Magento 2.x
-This is a Paymark Online EFTPOS payment module for Magento 2. 
+This is a Paymark Online EFTPOS payment module for Magento 2. Please read this file carefully and follow all instructions to install and configure the payment module successfully.
 
 Tested on Magento 2.3.x only.
 
@@ -10,6 +10,8 @@ To install this module use the following composer command:
 `composer require onfire/paymarkoe`
 
 Alternatively download the package and put the files into this folder in your Magento directory: `app/Onfire/PaymarkOE`
+
+Note: If you do not use Composer you will not receive automatic updates.  Please use your GitHub account to subscribe to the payment module repository so you are alerted to updates.
 
 After installing the files please run the following commands to enable the module:
 
@@ -23,28 +25,28 @@ php bin/magento setup:upgrade
 
 ## Config
 
-You will need to register for Online EFTPOS before configuring this module. Visit www.paymark.co.nz for more info.
+You will need to have an Online EFTPOS account before configuring this module. Visit https://www.paymark.co.nz/products/online-eftpos/ for more info.
 
 After the module has been installed go to `Stores > Settings > Configuration > Sales > Payment Methods` in the Magento Admin to find the configuration options.
 
 The configuration options are as follows:
 
 * Title: Title that will appear on the checkout page
-* OE Merhcant ID: Merchant ID for your Online Eftpos account (supplied by Paymark)
-* OE Consumer Key: Consumer Key for your Online Eftpos account (supplied by Paymark)
-* OE Consumer Secret: Consumer Secret for your Online Eftpos account (supplied by Paymark)
-* Allow Autopay: Flag to enable Autopay during checkout
-* UAT: Flag to alternate UAT environment - this changes the payment URL
+* OE Merchant ID: Merchant ID for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* OE Consumer Key: Consumer Key for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* OE Consumer Secret: Consumer Secret for your Online EFTPOS account (available in the Online EFTPOS Portal http://oe.paymark.co.nz/)
+* Allow Autopay: Flag to enable Autopay during checkout, contact Paymark if you wish to enable Autopay
+* UAT: Flag to change the payment URL to connect to the Online EFTPOS Sandbox environment for testing purposes, you will need to use the Merchant ID and Consumer Key/Secret for your Online EFTPOS Sandbox account (https://oe.demo.paymark.co.nz/) when using this setting
 * Debug Log: Write logs to paymark.log during the checkout process for debugging purposes
-
-Online Eftpos only supports doing a full Authorise and Capture (no Authorise only).
 
 ## Autopay Maintenance Callback
 
-When using Autopay, it is possible that a customer will delete their Autopay contract within thier banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in magento.
+This applies if you have Autopay enabled on your account.  Contact Paymark on 0800 PAYMARK to discuss using Autopay.
+
+When using Autopay, it is possible that a customer will delete their Autopay contract within their banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in Magento.
 
 ```
 https://yourwebsite.url/paymarkoe/maintenance/callback/
 ```
 
-This will need to be supplied to Paymark when the account is being setup. 
+This URL will need to be supplied to Paymark when the account is being set up. 
