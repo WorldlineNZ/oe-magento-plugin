@@ -4,7 +4,7 @@
  * See COPYING.txt for license details.
  */
 
-namespace Onfire\PaymarkOE\Observer;
+namespace Paymark\PaymarkOE\Observer;
 
 use Magento\Framework\Event\Observer;
 use Magento\Payment\Observer\AbstractDataAssignObserver;

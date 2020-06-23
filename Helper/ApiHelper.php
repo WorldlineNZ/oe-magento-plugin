@@ -1,24 +1,24 @@
 <?php
 
-namespace Onfire\PaymarkOE\Helper;
+namespace Paymark\PaymarkOE\Helper;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
-use Onfire\PaymarkOE\Exception\ApiConflictException;
-use Onfire\PaymarkOE\Model\OnlineEftposApi;
-use Onfire\PaymarkOE\Model\Ui\ConfigProvider;
+use Paymark\PaymarkOE\Exception\ApiConflictException;
+use Paymark\PaymarkOE\Model\OnlineEftposApi;
+use Paymark\PaymarkOE\Model\Ui\ConfigProvider;
 
 class ApiHelper extends AbstractHelper
 {
 
     /**
-     * @var \Onfire\PaymarkOE\Helper\Helper
+     * @var \Paymark\PaymarkOE\Helper\Helper
      */
     private $_helper;
 
     /**
-     * @var \Onfire\PaymarkOE\Model\OnlineEftposApi
+     * @var \Paymark\PaymarkOE\Model\OnlineEftposApi
      */
     private $_paymarkApi;
 
@@ -45,9 +45,9 @@ class ApiHelper extends AbstractHelper
 
         $this->_storeManager = $this->_objectManager->create("\Magento\Store\Model\StoreManagerInterface");
 
-        $this->_helper = $this->_objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $this->_helper = $this->_objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
 
-        $this->_paymarkApi = $this->_objectManager->create("\Onfire\PaymarkOE\Model\OnlineEftposApi");
+        $this->_paymarkApi = $this->_objectManager->create("\Paymark\PaymarkOE\Model\OnlineEftposApi");
     }
 
     /**
@@ -99,7 +99,7 @@ class ApiHelper extends AbstractHelper
             if ($paymentType == ConfigProvider::TYPE_AUTOPAY) {
                 // if payment type uses autopay, find the token
 
-                $agreementHelper = $this->_objectManager->create("\Onfire\PaymarkOE\Helper\AgreementHelper");
+                $agreementHelper = $this->_objectManager->create("\Paymark\PaymarkOE\Helper\AgreementHelper");
                 $agreement = $agreementHelper->getAgreementById($paymentInformation['selected_agreement']);
                 if($agreement->getCustomerId() !== $order->getCustomerId()) {
                     throw new LocalizedException(__("Agreement is not under the order customer account."));

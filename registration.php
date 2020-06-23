@@ -6,6 +6,6 @@
 
 \Magento\Framework\Component\ComponentRegistrar::register(
     \Magento\Framework\Component\ComponentRegistrar::MODULE,
-    'Onfire_PaymarkOE',
+    'Paymark_PaymarkOE',
     __DIR__
 );

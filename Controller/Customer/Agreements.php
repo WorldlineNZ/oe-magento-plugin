@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Controller\Customer;
+namespace Paymark\PaymarkOE\Controller\Customer;
 
 class Agreements extends \Magento\Framework\App\Action\Action
 {

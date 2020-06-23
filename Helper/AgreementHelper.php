@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Helper;
+namespace Paymark\PaymarkOE\Helper;
 
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -10,7 +10,7 @@ use Magento\Vault\Api\Data\PaymentTokenInterface;
 use Magento\Framework\Intl\DateTimeFactory;
 use Magento\Framework\Api\SortOrderBuilder;
 use Magento\Vault\Model\PaymentTokenFactory;
-use Onfire\PaymarkOE\Model\Ui\ConfigProvider;
+use Paymark\PaymarkOE\Model\Ui\ConfigProvider;
 
 class AgreementHelper
 {

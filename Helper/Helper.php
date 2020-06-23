@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Helper;
+namespace Paymark\PaymarkOE\Helper;
 
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
@@ -9,7 +9,7 @@ use Magento\Framework\Component\ComponentRegistrarInterface;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Sales\Model\Order;
-use Onfire\PaymarkOE\Model\OnlineEftposApi;
+use Paymark\PaymarkOE\Model\OnlineEftposApi;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Quote\Api\CartRepositoryInterface;
 
@@ -57,11 +57,11 @@ class Helper
     private $_componentRegistrar;
 
     /**
-     * @var \Onfire\PaymarkOE\Logger\PaymentLogger
+     * @var \Paymark\PaymarkOE\Logger\PaymentLogger
      */
     private $_logger;
 
-    const MODULE_NAME = 'Onfire_PaymarkOE';
+    const MODULE_NAME = 'Paymark_PaymarkOE';
 
     const CONFIG_PREFIX = 'payment/paymarkoe/';
 
@@ -114,7 +114,7 @@ class Helper
 
         $this->_checkoutSession = $this->_objectManager->get('\Magento\Checkout\Model\Session');
 
-        $this->_logger = $this->_objectManager->get("\Onfire\PaymarkOE\Logger\PaymentLogger");
+        $this->_logger = $this->_objectManager->get("\Paymark\PaymarkOE\Logger\PaymentLogger");
     }
 
     /**
@@ -256,7 +256,7 @@ class Helper
     public function processOrder($order, $query = true)
     {
         $logPrepend = $query ? '(query)' : '(callback)';
-        $apiHelper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\ApiHelper");
+        $apiHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\ApiHelper");
 
         // if already completed for whatever reason, just stop
         if(in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
@@ -392,7 +392,7 @@ class Helper
             return false;
         }
 
-        $agreementHelper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\AgreementHelper");
+        $agreementHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
 
         $agreement = $agreementHelper->createCustomerAgreement(
             $order->getCustomerId(),

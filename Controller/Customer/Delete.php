@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Controller\Customer;
+namespace Paymark\PaymarkOE\Controller\Customer;
 
 use Magento\Framework\Exception\LocalizedException;
 
@@ -21,7 +21,7 @@ class Delete extends \Magento\Framework\App\Action\Action
 
     /**
      *
-     * @var \Onfire\PaymarkOE\Helper\ApiHelper
+     * @var \Paymark\PaymarkOE\Helper\ApiHelper
      */
     private $_helper;
 
@@ -36,7 +36,7 @@ class Delete extends \Magento\Framework\App\Action\Action
 
         $this->_customerSession = $this->_objectManager->get('\Magento\Customer\Model\Session');
 
-        $this->_helper = $this->_objectManager->get("\Onfire\PaymarkOE\Helper\AgreementHelper");
+        $this->_helper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
     }
 
     public function execute()

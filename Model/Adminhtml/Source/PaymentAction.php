@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Model\Adminhtml\Source;
+namespace Paymark\PaymarkOE\Model\Adminhtml\Source;
 
 /**
  * Class PaymentAction

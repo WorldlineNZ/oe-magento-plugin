@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Exception;
+namespace Paymark\PaymarkOE\Exception;
 
 class ApiConflictException extends \Exception
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Controller\Callback;
+namespace Paymark\PaymarkOE\Controller\Callback;
 
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -29,7 +29,7 @@ class Response extends \Magento\Framework\App\Action\Action implements CsrfAware
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        $helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
 
         $helper->log(__METHOD__ . " execute Paymark OE callback");
 

@@ -7,15 +7,15 @@ Tested on Magento 2.3.x only.
 
 To install this module use the following composer command:
 
-`composer require onfire/paymarkoe`
+`composer require paymark/paymarkoe`
 
-Alternatively download the package and put the files into this folder in your Magento directory: `app/Onfire/PaymarkOE`
+Alternatively download the package and put the files into this folder in your Magento directory: `app/Paymark/PaymarkOE`
 
 After installing the files please run the following commands to enable the module:
 
 ```
 #enable the module
-php bin/magento module:enable Onfire_PaymarkOE
+php bin/magento module:enable Paymark_PaymarkOE
 
 #run magento setup
 php bin/magento setup:upgrade

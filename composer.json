@@ -1,5 +1,5 @@
 {
-    "name": "onfire/paymarkoe",
+    "name": "paymark/paymarkoe",
     "description": "Paymark Online Eftpos integration for Magento 2",
     "require": {
         "magento/framework": "~100.0|~101.0|~102.0",
@@ -11,14 +11,14 @@
         "ext-openssl" : "*"
     },
     "type": "magento2-module",
-    "version": "0.3.9",
+    "version": "0.4.0",
     "license": "MIT",
     "autoload": {
         "files": [
             "registration.php"
         ],
         "psr-4": {
-            "Onfire\\PaymarkOE\\": ""
+            "Paymark\\PaymarkOE\\": ""
         }
     },
     "authors": [

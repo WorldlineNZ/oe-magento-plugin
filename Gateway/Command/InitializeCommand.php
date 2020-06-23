@@ -1,13 +1,13 @@
 <?php
 
-namespace Onfire\PaymarkOE\Gateway\Command;
+namespace Paymark\PaymarkOE\Gateway\Command;
 
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Payment\Gateway\CommandInterface;
 use Magento\Payment\Gateway\Data\OrderAdapterInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObject;
 use Magento\Sales\Model\Order\Payment\Interceptor;
-use Onfire\PaymarkOE\Helper\Helper;
+use Paymark\PaymarkOE\Helper\Helper;
 
 /**
  * InitializeCommand
@@ -25,11 +25,11 @@ class InitializeCommand implements CommandInterface
     public function execute(array $commandSubject)
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
         $helper->log(__METHOD__. ' execute');
 
-        /** @var \Onfire\PaymarkOE\Helper\ApiHelper $apiHelper */
-        $apiHelper = $objectManager->create("\Onfire\PaymarkOE\Helper\ApiHelper");
+        /** @var \Paymark\PaymarkOE\Helper\ApiHelper $apiHelper */
+        $apiHelper = $objectManager->create("\Paymark\PaymarkOE\Helper\ApiHelper");
 
         $orderState = $commandSubject['stateObject'];
 

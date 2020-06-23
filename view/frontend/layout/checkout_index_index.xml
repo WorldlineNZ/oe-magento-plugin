@@ -24,7 +24,7 @@
                                                             <!-- merge payment method renders here -->
                                                             <item name="children" xsi:type="array">
                                                                 <item name="paymarkoe" xsi:type="array">
-                                                                    <item name="component" xsi:type="string">Onfire_PaymarkOE/js/view/payment/oe</item>
+                                                                    <item name="component" xsi:type="string">Paymark_PaymarkOE/js/view/payment/oe</item>
                                                                     <item name="methods" xsi:type="array">
                                                                         <item name="paymarkoe" xsi:type="array">
                                                                             <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
