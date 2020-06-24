@@ -43,7 +43,7 @@ The configuration options are as follows:
 
 This applies if you have Autopay enabled on your account.  Contact Paymark on 0800 PAYMARK to discuss using Autopay.
 
-When using Autopay, it is possible that a customer will delete their Autopay contract within their banking app. When this happens a request is sent to the following URL with the contract ID to be deleted, so as that the agreement can also be deleted from the customer vault in Magento.
+When using Autopay, it is possible that a customer will delete their Autopay contract within their banking app. When this happens a request is sent to the following URL with the contract ID to be deleted.  When this happens the agreement should also be deleted from the customer vault in Magento.
 
 ```
 https://yourwebsite.url/paymarkoe/maintenance/callback/
