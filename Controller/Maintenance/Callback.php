@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Controller\Maintenance;
+namespace Paymark\PaymarkOE\Controller\Maintenance;
 
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\CsrfAwareActionInterface;
@@ -29,7 +29,7 @@ class Callback extends \Magento\Framework\App\Action\Action implements CsrfAware
     {
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        $helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
         $helper->log(__METHOD__ . " execute Paymark OE maintenance callback");
 
         $params = $this->getRequest()->getParams();
@@ -52,7 +52,7 @@ class Callback extends \Magento\Framework\App\Action\Action implements CsrfAware
             return false;
         }
 
-        $agreementHelper = $objectManager->get("\Onfire\PaymarkOE\Helper\AgreementHelper");
+        $agreementHelper = $objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
         $agreement = $agreementHelper->getAgreementByToken($params['oeTrustId']);
 
         // no agreement with the trust id, so stop

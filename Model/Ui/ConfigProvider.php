@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Model\Ui;
+namespace Paymark\PaymarkOE\Model\Ui;
 
 use Magento\Checkout\Model\ConfigProviderInterface;
 
@@ -26,12 +26,12 @@ final class ConfigProvider implements ConfigProviderInterface
     private $_session;
 
     /**
-     * @var \Onfire\PaymarkOE\Helper\Helper
+     * @var \Paymark\PaymarkOE\Helper\Helper
      */
     private $_helper;
 
     /**
-     * @var \Onfire\PaymarkOE\Helper\AgreementHelper
+     * @var \Paymark\PaymarkOE\Helper\AgreementHelper
      */
     private $_agreementHelper;
 
@@ -99,9 +99,9 @@ final class ConfigProvider implements ConfigProviderInterface
 
         $this->_session = $session;
 
-        $this->_helper = $this->_objectManager->get('\Onfire\PaymarkOE\Helper\Helper');
+        $this->_helper = $this->_objectManager->get('\Paymark\PaymarkOE\Helper\Helper');
 
-        $this->_agreementHelper = $this->_objectManager->get('\Onfire\PaymarkOE\Helper\AgreementHelper');
+        $this->_agreementHelper = $this->_objectManager->get('\Paymark\PaymarkOE\Helper\AgreementHelper');
     }
 
     /**
@@ -137,7 +137,7 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     public function getOnlineEftposLogo()
     {
-        $url =  $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/logo.svg");;
+        $url =  $this->_assetRepo->getUrl("Paymark_PaymarkOE::images/logo.svg");;
         return $url;
     }
 
@@ -204,6 +204,6 @@ final class ConfigProvider implements ConfigProviderInterface
      */
     private function getImagePath($image)
     {
-        return $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/" . $image);
+        return $this->_assetRepo->getUrl("Paymark_PaymarkOE::images/" . $image);
     }
 }

@@ -17,7 +17,7 @@ define(
         rendererList.push(
             {
                 type: 'paymarkoe',
-                component: 'Onfire_PaymarkOE/js/view/payment/method-renderer/oe'
+                component: 'Paymark_PaymarkOE/js/view/payment/method-renderer/oe'
             }
         );
         /** Add view logic here if needed */

@@ -10,7 +10,7 @@ define(
         'ko',
         'Magento_Checkout/js/view/payment/default',
         'Magento_Checkout/js/model/quote',
-        'Onfire_PaymarkOE/js/action/paymark-query'
+        'Paymark_PaymarkOE/js/action/paymark-query'
     ],
     function ($, ko, Component, quote, paymarkQuery) {
         'use strict';
@@ -151,7 +151,7 @@ define(
             timerInterval: null,
 
             defaults: {
-                template: 'Onfire_PaymarkOE/payment/oe'
+                template: 'Paymark_PaymarkOE/payment/oe'
             },
 
             redirectAfterPlaceOrder: false,

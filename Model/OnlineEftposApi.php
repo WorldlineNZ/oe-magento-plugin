@@ -1,10 +1,10 @@
 <?php
 
-namespace Onfire\PaymarkOE\Model;
+namespace Paymark\PaymarkOE\Model;
 
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\StoreManager;
-use Onfire\PaymarkOE\Exception\ApiConflictException;
+use Paymark\PaymarkOE\Exception\ApiConflictException;
 use Zend\Http\Client;
 use Zend\Http\Request;
 
@@ -12,7 +12,7 @@ class OnlineEftposApi
 {
 
     /**
-     * @var \Onfire\PaymarkOE\Helper\Helper
+     * @var \Paymark\PaymarkOE\Helper\Helper
      */
     private $_helper;
 
@@ -102,7 +102,7 @@ class OnlineEftposApi
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
-        $this->_helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $this->_helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
 
         $this->_prod = $this->_helper->isProdMode();
 

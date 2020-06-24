@@ -10,7 +10,7 @@
 		</referenceBlock>
 
 		<referenceContainer name="content">
-			<block class="Onfire\PaymarkOE\Block\Customer\Agreements" name="paymarkoe_agreements" template="customer/agreements.phtml" cacheable="false" />
+			<block class="Paymark\PaymarkOE\Block\Customer\Agreements" name="paymarkoe_agreements" template="customer/agreements.phtml" cacheable="false" />
 		</referenceContainer>
 	</body>
 </page>

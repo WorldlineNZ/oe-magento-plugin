@@ -1,6 +1,6 @@
 <?php
 
-namespace Onfire\PaymarkOE\Model\Api;
+namespace Paymark\PaymarkOE\Model\Api;
 
 use Magento\Sales\Model\Order;
 
@@ -50,7 +50,7 @@ class QueryManagement
         $order = $this->_checkoutSession->getLastRealOrder();
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $helper = $objectManager->create("\Onfire\PaymarkOE\Helper\Helper");
+        $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
 
         if(!$order) {
             $helper->log(__METHOD__. " no last order?");

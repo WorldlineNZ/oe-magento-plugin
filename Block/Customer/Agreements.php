@@ -1,8 +1,8 @@
 <?php
 
-namespace Onfire\PaymarkOE\Block\Customer;
+namespace Paymark\PaymarkOE\Block\Customer;
 
-use Onfire\PaymarkOE\Model\Ui\ConfigProvider;
+use Paymark\PaymarkOE\Model\Ui\ConfigProvider;
 
 class Agreements extends \Magento\Framework\View\Element\Template
 {
@@ -13,7 +13,7 @@ class Agreements extends \Magento\Framework\View\Element\Template
     private $_customerSession;
 
     /**
-     * @var \Onfire\PaymarkOE\Helper\Helper
+     * @var \Paymark\PaymarkOE\Helper\Helper
      */
     private $_helper;
 
@@ -36,7 +36,7 @@ class Agreements extends \Magento\Framework\View\Element\Template
 
         $this->_customerSession = $objectManager->get("\Magento\Customer\Model\Session");
 
-        $this->_helper = $objectManager->get("\Onfire\PaymarkOE\Helper\AgreementHelper");
+        $this->_helper = $objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
 
         $this->_assetRepo = $objectManager->get("\Magento\Framework\View\Asset\Repository");
     }
@@ -89,7 +89,7 @@ class Agreements extends \Magento\Framework\View\Element\Template
      */
     private function getLogoPath($image)
     {
-        return $this->_assetRepo->getUrl("Onfire_PaymarkOE::images/" . $image . ".png");
+        return $this->_assetRepo->getUrl("Paymark_PaymarkOE::images/" . $image . ".png");
     }
 
     /**
