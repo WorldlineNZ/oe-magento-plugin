@@ -53,83 +53,34 @@ class ApiHelper extends AbstractHelper
     /**
      * Generate payment request with Paymark OE API
      *
+     * @todo naming conventions
+     *
      * @param \Magento\Sales\Model\Order\Payment\Interceptor $payment
      * @param $orderState
-     * @param $paymentAction
      * @return mixed
      * @throws LocalizedException
      */
-    public function createPaymentRequest(\Magento\Sales\Model\Order\Payment\Interceptor $payment, $orderState, $paymentAction)
+    public function createPaymentRequest(\Magento\Sales\Model\Order\Payment\Interceptor $payment, $orderState)
     {
         $this->_helper->log(__METHOD__ . " Create payment request object");
 
         $order = $payment->getOrder();
 
-        $paymentInformation = $payment->getAdditionalInformation();
-
-        $paymentType = !empty($paymentInformation['payment_type']) ? $paymentInformation['payment_type'] : ConfigProvider::TYPE_STANDARD;
-        if($paymentType == ConfigProvider::TYPE_AUTOPAY && empty($paymentInformation['selected_agreement'])) {
-
-            // doing auto payment but the agreement is not selected
-            $this->_helper->log(__METHOD__ . " Selected agreement missing for order " . $order->getIncrementId());
-            throw new LocalizedException(__("Autopay agreement missing for order - please try again."));
-
-        } else if($paymentType == ConfigProvider::TYPE_STANDARD && (empty($paymentInformation['mobile_number']) || empty($paymentInformation['selected_bank']))) {
-
-            // doing normal payment but the mobile or bank is missing
-            $this->_helper->log(__METHOD__ . " Mobile number or bank missing for order " . $order->getIncrementId());
-            throw new LocalizedException(__("Mobile number or bank missing - please try again."));
-
-        }
-
         try {
-
-            // create callback url
-            $callback = $this->_getUrl('paymarkoe/callback/response/', [
-                'orderId' => $order->getIncrementId(),
-                '_secure' => true
-            ]);
-
             // multiply order value by 100 as per OE docs
             $total = bcmul($order->getBaseGrandTotal(), 100);
 
-            $reference = $this->getStoreName() . ' OE Payment';
-
-            $transactionType = OnlineEftposApi::TYPE_REGULAR;
-            if ($paymentType == ConfigProvider::TYPE_AUTOPAY) {
-                // if payment type uses autopay, find the token
-
-                $agreementHelper = $this->_objectManager->create("\Paymark\PaymarkOE\Helper\AgreementHelper");
-                $agreement = $agreementHelper->getAgreementById($paymentInformation['selected_agreement']);
-                if($agreement->getCustomerId() !== $order->getCustomerId()) {
-                    throw new LocalizedException(__("Agreement is not under the order customer account."));
-                }
-
-                // set payment details based on token instead
-                $agreementDetails = json_decode($agreement->getTokenDetails());
-                $paymentInformation['mobile_number'] = $agreementDetails->payer;
-                $paymentInformation['selected_bank'] = $agreementDetails->bank;
-
-                $transactionType = OnlineEftposApi::TYPE_TRUSTED;
-
-            } elseif (!empty($paymentInformation['setup_autopay']) && $paymentInformation['setup_autopay']) {
-                $transactionType = OnlineEftposApi::TYPE_TRUSTSETUP;
-            }
-
+            // login to the API to start
             $this->_paymarkApi->login();
-            $transaction = $this->_paymarkApi->createTransaction(
+
+            $session = $this->_paymarkApi->createOpenSession(
                 $order->getIncrementId(),
                 $total,
                 $order->getOrderCurrencyCode(),
-                $paymentInformation['mobile_number'],
-                $paymentInformation['selected_bank'],
-                $reference,
-                $this->getStoreUrl(),
-                $callback,
-                $transactionType
+                $this->_helper->canUseAutopay()
             );
 
-            $this->_helper->log(__METHOD__ . " Request created with ID " . $transaction->id);
+            $this->_helper->log(__METHOD__ . " Request created with ID " . $session->id);
 
         } catch (ApiConflictException $e) {
             $this->_helper->log(__METHOD__ . " Failed to generate payment request");
@@ -143,10 +94,11 @@ class ApiHelper extends AbstractHelper
             throw new LocalizedException(__("Failed to generate payment request - please check your errors logs or contact support"));
         }
 
-        if (empty($transaction->id)) {
+        if (empty($session->id)) {
             throw new LocalizedException(__("Failed to generate payment request - please check your errors logs or contact support"));
         }
 
+        // set order as pending payment
         $orderState->setState(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
         $orderState->setStatus(\Magento\Sales\Model\Order::STATE_PENDING_PAYMENT);
         $orderState->setIsNotified(false);
@@ -158,29 +110,33 @@ class ApiHelper extends AbstractHelper
 
         $this->_helper->log(__METHOD__ . " Order saved");
 
-        return $transaction->id;
+        return $session->id;
     }
 
     /**
-     * Find transaction at Paymark using the $transactionId
+     * Query a current Openjs session
      *
      * @param $transactionId
      * @return mixed
-     * @throws LocalizedException
+     * @throws \Exception
      */
-    public function findTransaction($transactionId)
+    public function querySession($transactionId)
     {
-        try {
-            $this->_paymarkApi->login();
-            $transaction = $this->_paymarkApi->getTransaction($transactionId);
-        } catch (\Exception $e) {
-            $this->_helper->log(__METHOD__ . " Failed to find payment request for id " . $transactionId);
-            $this->_helper->log($e->getMessage());
+        $this->_paymarkApi->login();
+        return $this->_paymarkApi->queryOpenSession($transactionId);
+    }
 
-            throw new LocalizedException(__("Failed to generate payment request - please check your errors logs or contact support"));
-        }
-
-        return $transaction;
+    /**
+     * Get a completed Openjs transaction using the $transactionId
+     *
+     * @param $transactionId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getTransaction($transactionId)
+    {
+        $this->_paymarkApi->login();
+        return $this->_paymarkApi->getOpenTransaction($transactionId);
     }
 
     /**

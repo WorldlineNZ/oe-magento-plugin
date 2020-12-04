@@ -44,6 +44,8 @@
 
     <virtualType name="PaymarkOEInitializeCommand" type="Paymark\PaymarkOE\Gateway\Command\InitializeCommand"></virtualType>
 
+    <preference for="Paymark\PaymarkOE\Api\StatusManagementInterface" type="Paymark\PaymarkOE\Model\Api\StatusManagement" />
+
     <preference for="Paymark\PaymarkOE\Api\QueryManagementInterface" type="Paymark\PaymarkOE\Model\Api\QueryManagement" />
 
     <!-- Configuration reader -->

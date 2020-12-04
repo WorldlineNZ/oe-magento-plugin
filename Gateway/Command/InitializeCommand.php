@@ -16,7 +16,7 @@ class InitializeCommand implements CommandInterface
 {
 
     /**
-     * Create payment request with Paymark OE
+     * Create new OpenJS session with Paymark
      *
      * @param array $commandSubject
      * @return \Magento\Payment\Gateway\Command\ResultInterface|null|void
@@ -33,9 +33,6 @@ class InitializeCommand implements CommandInterface
 
         $orderState = $commandSubject['stateObject'];
 
-        $paymentAction = $commandSubject['paymentAction'];
-        $helper->log(__METHOD__. ' action:' . $paymentAction);
-
         /** @var PaymentDataObject $paymentDO */
         $paymentDO = $commandSubject['payment'];
 
@@ -48,10 +45,10 @@ class InitializeCommand implements CommandInterface
         $helper->log(__METHOD__. " create payment request for orderId: {$order->getOrderIncrementId()}");
 
         try {
-            // create remote payment request with Paymark
-            $transactionId = $apiHelper->createPaymentRequest($payment, $orderState, $paymentAction);
+            // create remote OpenJS payment session with Paymark
+            $transactionId = $apiHelper->createPaymentRequest($payment, $orderState);
 
-            // save to additionalInformation for later
+            // save session id to additionalInformation for later
             $additionalInfo = $payment->getAdditionalInformation();
             $additionalInfo["TransactionID"] = $transactionId;
 
@@ -59,19 +56,6 @@ class InitializeCommand implements CommandInterface
             $payment->setAdditionalInformation($additionalInfo);
 
             $helper->log(__METHOD__. " set payment info with remote transaction id");
-        } catch(\Exception $e) {
-            $helper->log(__METHOD__. " initialize exception");
-            throw new LocalizedException(__($e->getMessage()));
-        }
-
-        try {
-            // check if the payment is already complete
-            $result = $helper->checkTransactionAndProcess($apiHelper->findTransaction($transactionId), $orderState);
-
-            if($result && $result == Helper::RESULT_FAILED) {
-                throw new \Exception('Payment was declined');
-            }
-
         } catch(\Exception $e) {
             $helper->log(__METHOD__. " initialize exception");
             throw new LocalizedException(__($e->getMessage()));

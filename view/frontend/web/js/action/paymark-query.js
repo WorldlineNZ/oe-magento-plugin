@@ -14,7 +14,7 @@ define(
 
         'use strict';
 
-        return function (messageContainer, onFailure) {
+        return function (messageContainer) {
             var module = 'paymarkoe';
             var attempts = 0;
             var timeoutLength = 4000; // 4 second query interval
@@ -22,8 +22,6 @@ define(
             var redirectUrl = null;
             var finished = false;
             var interval = null;
-
-            //fullScreenLoader.startLoader();
 
             if (!customer.isLoggedIn()) {
                 var url = '/guest-carts/:module/query';
@@ -35,8 +33,6 @@ define(
 
             var stopPolling = function () {
                 clearInterval(interval);
-                //fullScreenLoader.stopLoader();
-                onFailure();
             }
 
             // start querying to see if the payment is complete

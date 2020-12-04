@@ -3,7 +3,7 @@
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
 
-    <!-- Guest Payment -->
+    <!-- Guest Transaction Query -->
     <route url="/V1/guest-carts/paymarkoe/query" method="GET">
         <service class="Paymark\PaymarkOE\Api\QueryManagementInterface" method="getTransactionStatus"/>
         <resources>
@@ -11,9 +11,25 @@
         </resources>
     </route>
 
-    <!-- Normal User Payment -->
+    <!-- Normal User Transaction Query -->
     <route url="/V1/carts/mine/paymarkoe/query" method="GET">
         <service class="Paymark\PaymarkOE\Api\QueryManagementInterface" method="getTransactionStatus"/>
+        <resources>
+            <resource ref="self" />
+        </resources>
+    </route>
+
+    <!-- Guest Payment Status Lookup -->
+    <route url="/V1/guest-carts/paymarkoe/status" method="GET">
+        <service class="Paymark\PaymarkOE\Api\StatusManagementInterface" method="getTransactionStatus"/>
+        <resources>
+            <resource ref="anonymous" />
+        </resources>
+    </route>
+
+    <!-- Normal User Payment Status Lookup -->
+    <route url="/V1/carts/mine/paymarkoe/status" method="GET">
+        <service class="Paymark\PaymarkOE\Api\StatusManagementInterface" method="getTransactionStatus"/>
         <resources>
             <resource ref="self" />
         </resources>

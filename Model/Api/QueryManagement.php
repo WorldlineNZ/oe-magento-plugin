@@ -41,19 +41,26 @@ class QueryManagement
     }
 
     /**
-     * Get Paymark transaction status and return order status to frontend
+     * Get Paymark transaction details and return order status to frontend
      *
-     * @return array|mixed|string
+     * @todo should get renamed?
+     *
+     * @return bool|false|string|void
+     * @throws \Exception
      */
     public function getTransactionStatus()
     {
+        //@todo how can we make this more robust? maybe it could be passed back through
         $order = $this->_checkoutSession->getLastRealOrder();
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+
+        /** @var \Paymark\PaymarkOE\Helper\Helper $helper */
         $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
 
         if(!$order) {
             $helper->log(__METHOD__. " no last order?");
+            return;
         }
 
         // double check order to see if it's already completed
@@ -62,6 +69,7 @@ class QueryManagement
         }
 
         $order = $helper->getOrderByIncrementId($order->getIncrementId());
+
         $helper->processOrder($order);
 
         return $this->handleResponse($order);
