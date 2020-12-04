@@ -53,8 +53,6 @@ class ApiHelper extends AbstractHelper
     /**
      * Generate payment request with Paymark OE API
      *
-     * @todo naming conventions
-     *
      * @param \Magento\Sales\Model\Order\Payment\Interceptor $payment
      * @param $orderState
      * @return mixed

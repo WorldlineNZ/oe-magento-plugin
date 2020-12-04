@@ -13,5 +13,5 @@ interface QueryManagementInterface
      * @api
      * @return string
      */
-    public function getTransactionStatus();
+    public function getTransactionDetails();
 }

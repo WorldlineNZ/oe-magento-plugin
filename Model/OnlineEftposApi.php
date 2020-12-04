@@ -183,49 +183,6 @@ class OnlineEftposApi
     }
 
     /**
-     * Generate payment request with Paymark OE
-     *
-     * @param $orderId
-     * @param $value
-     * @param $currency
-     * @param $payerId
-     * @param $bankId
-     * @param $description
-     * @param $merchantUrl
-     * @param $callbackUrl
-     * @param $type
-     * @param string $payerType
-     * @return mixed
-     * @throws \Exception
-     */
-    public function createTransaction($orderId, $value, $currency, $payerId, $bankId, $description, $merchantUrl, $callbackUrl, $type = self::TYPE_REGULAR, $payerType = 'MOBILE')
-    {
-        $params = [
-            'bank' => [
-                'payerId' => $payerId,
-                'bankId' => $bankId,
-                'payerIdType' => $payerType
-            ],
-            'merchant' => [
-                'merchantIdCode' => $this->_merchantId,
-                'merchantUrl' => $merchantUrl,
-                'callbackUrl' => $callbackUrl
-            ],
-            'transaction' => [
-                'amount' => $value,
-                'transactionType' => $type,
-                'currency' => $currency,
-                'description' => $description,
-                'orderId' => $orderId,
-                'userAgent' => $_SERVER['HTTP_USER_AGENT'],
-                'userIpAddress' => $this->getClientIP()
-            ]
-        ];
-
-        return $this->call(Request::METHOD_POST, 'transaction/oepayment/', $params);
-    }
-
-    /**
      * Get transaction details from transaction id
      *
      * @param $transactionId
@@ -234,7 +191,7 @@ class OnlineEftposApi
      */
     public function getTransaction($transactionId)
     {
-        return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId);
+        return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId, [], false, true);
     }
 
     /**
@@ -248,7 +205,7 @@ class OnlineEftposApi
     {
         return $this->call(Request::METHOD_PUT, 'oemerchanttrust/' . $autopayId, [
             'status' => 'CANCELLED'
-        ]);
+        ], false, true);
     }
 
     /**
@@ -258,10 +215,12 @@ class OnlineEftposApi
      * @param null $uri
      * @param array $params
      * @param bool $authorise
+     * @param bool $customType
      * @return mixed
-     * @throws \Exception
+     * @throws ApiConflictException
+     * @throws ApiNotFoundException
      */
-    public function call($method, $uri = null, array $params = [], $authorise = false)
+    public function call($method, $uri = null, array $params = [], $authorise = false, $customType = false)
     {
         $this->_client->reset();
 
@@ -278,9 +237,7 @@ class OnlineEftposApi
 
                 $this->_client->setParameterPost($params);
             } else {
-                //@todo tidy up
-                //$contentType = 'application/vnd.paymark_api+json';
-                $contentType = 'application/json';
+                $contentType = $customType ? 'application/vnd.paymark_api+json' : 'application/json';
 
                 $this->_client->setHeaders([
                     'Authorization' => 'Bearer ' . $this->_bearer,
@@ -303,6 +260,8 @@ class OnlineEftposApi
             $this->_client->send();
 
             $response = $this->_client->getResponse();
+
+            $this->_helper->log($response->getBody());
 
         } catch (\Zend\Http\Exception\RuntimeException $e) {
             $this->_helper->log('Zend client error: ' . $e->getMessage());

@@ -255,8 +255,6 @@ class Helper
     /**
      * Query OpenJS transaction session
      *
-     * @todo naming?
-     *
      * @param $order
      * @return bool|mixed
      * @throws \Exception
