@@ -30,6 +30,36 @@ final class ConfigProvider implements ConfigProviderInterface
     const VAULT_CODE = 'paymarkoe_vault';
 
     /**
+     * All bank details
+     */
+    const BANKS = [
+        'ASB' => [
+            'title' => 'ASB',
+            'short' => 'ASB',
+            'image' => 'popup-asb',
+            'logo' => 'logo-asb'
+        ],
+        'HEARTLAND' => [
+            'title' => 'Heartland Bank',
+            'short' => 'Heartland',
+            'image' => 'popup-heartland',
+            'logo' => 'logo-heartland'
+        ],
+        'COOPERATIVE' => [
+            'title' => 'The Co-operative Bank',
+            'short' => 'Co-operative',
+            'image' => 'popup-cooperative',
+            'logo' => 'logo-cooperative'
+        ],
+        'WESTPAC' => [
+            'title' => 'Westpac',
+            'short' => 'Westpac',
+            'image' => 'popup-westpac',
+            'logo' => 'logo-westpac'
+        ],
+    ];
+
+    /**
      * ConfigProvider constructor.
      *
      * @param \Magento\Framework\View\Asset\Repository $assetRepo

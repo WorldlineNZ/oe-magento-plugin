@@ -23,7 +23,7 @@ define(
 
             var serviceUrl = urlBuilder.createUrl(url, {module: module});
 
-            storage.get(serviceUrl)
+            return storage.get(serviceUrl)
                 .done(function (result) {
                     if(!result.length) {
                         return;

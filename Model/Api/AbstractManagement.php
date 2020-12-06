@@ -86,7 +86,7 @@ class AbstractManagement
             case Order::STATE_COMPLETE:
                 return json_encode([
                     'status' => 'success',
-                    'redirect' => $this->_urlInterface->getUrl("checkout/onepage/success", [
+                    'redirect' => $this->getUrlInterface()->getUrl("checkout/onepage/success", [
                         "_secure" => true
                     ])
                 ]);
@@ -97,7 +97,7 @@ class AbstractManagement
 
                 return json_encode([
                     'status' => 'failed',
-                    'redirect' => $this->_urlInterface->getUrl("checkout/cart", [
+                    'redirect' => $this->getUrlInterface()->getUrl("checkout/cart", [
                         "_secure" => true
                     ])
                 ]);

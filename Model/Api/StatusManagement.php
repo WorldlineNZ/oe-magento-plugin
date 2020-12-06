@@ -2,6 +2,7 @@
 
 namespace Paymark\PaymarkOE\Model\Api;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
 
 class StatusManagement extends AbstractManagement
@@ -27,14 +28,7 @@ class StatusManagement extends AbstractManagement
 
         // check the order is in pending state
         if ($order->getState() !== Order::STATE_PENDING_PAYMENT) {
-            $this->addMessageError('Payment already completed');
-
-            return json_encode([
-                'status' => 'failed',
-                'redirect' => $this->getUrlInterface()->getUrl("checkout/cart", [
-                    "_secure" => true
-                ])
-            ]);
+            throw new LocalizedException(__('Payment has already started'));
         }
 
         /** @var \Magento\Sales\Model\Order\Interceptor $order */

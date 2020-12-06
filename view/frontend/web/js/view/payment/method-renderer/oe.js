@@ -43,12 +43,14 @@ define(
             },
 
             afterPlaceOrder: function () {
-                fullScreenLoader.startLoader();
+                var self = this;
                 this.paymentActive(true);
+
+                fullScreenLoader.startLoader();
 
                 var messageContainer = this.messageContainer;
 
-                paymarkStatus(messageContainer, function (sessionId) {
+                var status = paymarkStatus(messageContainer, function (sessionId) {
                     if (window.openjs) {
                         window.openjs.init({
                             sessionId: sessionId,
@@ -63,6 +65,11 @@ define(
                         // openjs isn't available?
                         fullScreenLoader.stopLoader();
                     }
+                })
+
+                // if status fails we can restart payment
+                status.fail(function (response) {
+                    self.paymentActive(false);
                 })
 
             },
