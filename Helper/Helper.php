@@ -612,6 +612,8 @@ class Helper
         $info = $payment->getAdditionalInformation();
 
         $info['Status'] = $transaction->status;
+        $info['selected_bank'] = $transaction->bankId;
+        $info['mobile_number'] = $transaction->payerId;
 
         $payment->unsAdditionalInformation();
         $payment->setAdditionalInformation($info);
