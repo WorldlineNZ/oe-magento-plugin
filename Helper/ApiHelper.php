@@ -75,7 +75,8 @@ class ApiHelper extends AbstractHelper
                 $order->getIncrementId(),
                 $total,
                 $order->getOrderCurrencyCode(),
-                $this->_helper->canUseAutopay()
+                $this->_helper->canUseAutopay(),
+                $this->_helper->getCustomerTrustIds()
             );
 
             $this->_helper->log(__METHOD__ . " Request created with ID " . $session->id);

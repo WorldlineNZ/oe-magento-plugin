@@ -178,6 +178,29 @@ class Helper
     }
 
     /**
+     * Can this customer use autopay
+     *
+     * @return bool
+     */
+    public function getCustomerTrustIds()
+    {
+        $list = [];
+
+        if(!$this->canUseAutopay()) {
+            return $list;
+        }
+
+        $agreementHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
+        $agreements = $agreementHelper->getCustomerAgreements($this->_customerSession->getCustomerId());
+
+        foreach ($agreements as $agreement) {
+            $list[] = $agreement->getGatewayToken();
+        }
+
+        return $list;
+    }
+
+    /**
      * Validate request signature
      *
      * @param array $pieces
@@ -464,9 +487,8 @@ class Helper
      */
     private function _saveAutopayToken($transaction, $order)
     {
-        //@todo test this
-        if (empty($transaction->trust) ||
-            $transaction->trust->trustPaymentStatus != self::AUTOPAY_APPROVED ||
+        if (empty($transaction->trustPaymentStatus) ||
+            $transaction->trustPaymentStatus != self::AUTOPAY_APPROVED ||
             $transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
         ) {
             return false;
@@ -476,9 +498,9 @@ class Helper
 
         $agreement = $agreementHelper->createCustomerAgreement(
             $order->getCustomerId(),
-            $transaction->trust->id,
-            $transaction->bank->payerId,
-            $transaction->bank->bankId
+            $transaction->trustId,
+            $transaction->payerId,
+            $transaction->bankId
         );
 
         $this->log(__METHOD__ . " autopay agreement created successfully");

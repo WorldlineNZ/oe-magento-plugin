@@ -142,10 +142,11 @@ class OnlineEftposApi
      * @param $value
      * @param $currency
      * @param bool $autopay
+     * @param array $trustIds
      * @return mixed
      * @throws \Exception
      */
-    public function createOpenSession($orderId, $value, $currency, $autopay = false)
+    public function createOpenSession($orderId, $value, $currency, $autopay = false, $trustIds = [])
     {
         $params = [
             'amount' => (int) $value,
@@ -154,6 +155,10 @@ class OnlineEftposApi
             'orderId' => $orderId,
             'allowAutopay' => $autopay
         ];
+
+        if($trustIds) {
+            $params['trustIds'] = $trustIds;
+        }
 
         return $this->call(Request::METHOD_POST, 'openjs/v1/session', $params);
     }
