@@ -9,7 +9,7 @@
     <system>
         <section id="payment">
             <group id="paymarkoe" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Paymark Online Eftpos</label>
+                <label>Paymark Online EFTPOS</label>
 
                 <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Enabled</label>

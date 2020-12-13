@@ -20,6 +20,11 @@
         <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
         <!--/ko-->
+
+        <div class="oe-description">
+            <p>To learn more about making a successful Online EFTPOS transaction click <a href="https://www.paymark.co.nz/online-eftpos-autopay" target="_blank">here &rsaquo;</a></p>
+        </div>
+
         <div class="payment-method-billing-address">
             <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
             <!-- ko template: getTemplate() --><!-- /ko -->
