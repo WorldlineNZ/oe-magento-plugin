@@ -29,7 +29,9 @@ define(
                         return;
                     }
 
-                    callBack(result);
+                    result = result[0];
+
+                    callBack(result.sessionId, result.orderId);
                 })
                 .fail(function (response) {
                     errorProcessor.process(response, messageContainer);

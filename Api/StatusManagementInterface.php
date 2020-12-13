@@ -11,7 +11,7 @@ interface StatusManagementInterface
      * Return the transaction status for the OE request
      *
      * @api
-     * @return string
+     * @return array
      */
     public function getTransactionStatus();
 }

@@ -13,14 +13,22 @@ class QueryManagement extends AbstractManagement
      */
     public function getTransactionDetails()
     {
-        //@todo how can we make this more robust? maybe it could be passed back through
-        $order = $this->getCheckoutSession()->getLastRealOrder();
+        $params = $this->getRequest()->getParams();
+        $orderId = !empty($params['id']) ? $params['id'] : null;
 
         $helper = $this->getHelper();
 
-        if (!$order) {
-            $helper->log(__METHOD__ . " no last order?");
+        if(!$orderId) {
+            $helper->log(__METHOD__ . " no order id passed back to query api");
             return false;
+        }
+
+        try {
+            $order = $helper->getOrderById($orderId);
+        } catch (\Exception $e) {
+            $this->addMessageError('Order missing');
+
+            return $this->failedResponse();
         }
 
         // double check order to see if it's already completed
@@ -28,25 +36,30 @@ class QueryManagement extends AbstractManagement
             return $response;
         }
 
-        $order = $helper->getOrderByIncrementId($order->getIncrementId());
-
         try {
-
             $helper->processOrder($order);
 
             return $this->handleResponse($order);
-
         } catch (\Exception $e) {
             $this->addMessageError($e->getMessage());
 
-            return json_encode([
-                'status' => 'failed',
-                'redirect' => $this->getUrlInterface()->getUrl("checkout/cart", [
-                    "_secure" => true
-                ])
-            ]);
+            return $this->failedResponse();
         }
     }
 
+    /**
+     * Failure response
+     *
+     * @return string
+     */
+    public function failedResponse()
+    {
+        return json_encode([
+            'status' => 'failed',
+            'redirect' => $this->getUrlInterface()->getUrl("checkout/cart", [
+                "_secure" => true
+            ])
+        ]);
+    }
 
 }

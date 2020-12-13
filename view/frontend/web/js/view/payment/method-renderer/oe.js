@@ -50,7 +50,7 @@ define(
 
                 var messageContainer = this.messageContainer;
 
-                var status = paymarkStatus(messageContainer, function (sessionId) {
+                var status = paymarkStatus(messageContainer, function (sessionId, orderId) {
                     if (window.openjs) {
                         window.openjs.init({
                             sessionId: sessionId,
@@ -60,7 +60,7 @@ define(
                         fullScreenLoader.stopLoader();
 
                         // start checking for completed payments
-                        paymarkQuery(messageContainer);
+                        paymarkQuery(orderId, messageContainer);
                     } else {
                         // openjs isn't available?
                         fullScreenLoader.stopLoader();

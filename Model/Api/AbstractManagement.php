@@ -8,6 +8,11 @@ class AbstractManagement
 {
 
     /**
+     * @var \Magento\Framework\Webapi\Rest\Request
+     */
+    private $_request;
+
+    /**
      * @var \Magento\Framework\UrlInterface
      */
     private $_urlInterface;
@@ -23,21 +28,32 @@ class AbstractManagement
     private $_messageManager;
 
     /**
-     * QueryManagement constructor.
+     * AbstractManagement constructor.
      *
+     * @param \Magento\Framework\Webapi\Rest\Request $request
      * @param \Magento\Checkout\Model\Session $checkoutSession
      * @param \Magento\Framework\Message\ManagerInterface $messageManager
      * @param \Magento\Framework\UrlInterface $urlInterface
      */
     public function __construct(
+        \Magento\Framework\Webapi\Rest\Request $request,
         \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\Message\ManagerInterface $messageManager,
         \Magento\Framework\UrlInterface $urlInterface
     )
     {
+        $this->_request = $request;
         $this->_urlInterface = $urlInterface;
         $this->_checkoutSession = $checkoutSession;
         $this->_messageManager = $messageManager;
+    }
+
+    /**
+     * @return \Magento\Framework\Webapi\Rest\Request
+     */
+    public function getRequest()
+    {
+        return $this->_request;
     }
 
     /**

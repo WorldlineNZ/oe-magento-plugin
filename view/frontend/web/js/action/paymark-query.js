@@ -14,7 +14,7 @@ define(
 
         'use strict';
 
-        return function (messageContainer) {
+        return function (orderId, messageContainer) {
             var module = 'paymarkoe';
             var attempts = 0;
             var timeoutLength = 4000; // 4 second query interval
@@ -24,12 +24,12 @@ define(
             var interval = null;
 
             if (!customer.isLoggedIn()) {
-                var url = '/guest-carts/:module/query';
+                var url = '/guest-carts/:module/query/:orderId';
             } else {
-                var url = '/carts/mine/:module/query';
+                var url = '/carts/mine/:module/query/:orderId';
             }
 
-            var serviceUrl = urlBuilder.createUrl(url, {module: module});
+            var serviceUrl = urlBuilder.createUrl(url, {module: module, orderId: orderId});
 
             var stopPolling = function () {
                 clearInterval(interval);

@@ -262,6 +262,29 @@ class Helper
     }
 
     /**
+     * Get order model collection
+     *
+     * @return \Magento\Sales\Model\Order
+     */
+    public function getOrderModel()
+    {
+        return $this->_objectManager->create('Magento\Sales\Model\Order');
+    }
+
+    /**
+     * Get order by entity id
+     *
+     * @param $orderId
+     * @return mixed
+     */
+    public function getOrderById($orderId)
+    {
+        $orderInfo = $this->getOrderModel()->load($orderId);
+
+        return $orderInfo->getId() ? $orderInfo : null;
+    }
+
+    /**
      * Get order by increment id
      *
      * @param $incrementId
@@ -269,8 +292,7 @@ class Helper
      */
     public function getOrderByIncrementId($incrementId)
     {
-        $collection = $this->_objectManager->create('Magento\Sales\Model\Order');
-        $orderInfo = $collection->loadByIncrementId($incrementId);
+        $orderInfo = $this->getOrderModel()->loadByIncrementId($incrementId);
 
         return $orderInfo->getId() ? $orderInfo : null;
     }

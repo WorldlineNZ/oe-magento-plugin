@@ -4,15 +4,16 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
 
     <!-- Guest Transaction Query -->
-    <route url="/V1/guest-carts/paymarkoe/query" method="GET">
+    <route url="/V1/guest-carts/paymarkoe/query/:id" method="GET">
         <service class="Paymark\PaymarkOE\Api\QueryManagementInterface" method="getTransactionDetails"/>
         <resources>
             <resource ref="anonymous" />
         </resources>
     </route>
 
+
     <!-- Normal User Transaction Query -->
-    <route url="/V1/carts/mine/paymarkoe/query" method="GET">
+    <route url="/V1/carts/mine/paymarkoe/query/:id" method="GET">
         <service class="Paymark\PaymarkOE\Api\QueryManagementInterface" method="getTransactionDetails"/>
         <resources>
             <resource ref="self" />

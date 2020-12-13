@@ -11,7 +11,7 @@ class StatusManagement extends AbstractManagement
     /**
      * Get Paymark session status and return session id to frontend
      *
-     * @return string
+     * @return array
      * @throws \Exception
      */
     public function getTransactionStatus()
@@ -34,6 +34,11 @@ class StatusManagement extends AbstractManagement
         /** @var \Magento\Sales\Model\Order\Interceptor $order */
         $order = $helper->getOrderByIncrementId($order->getIncrementId());
 
-        return $helper->checkTransactionSession($order)->id;
+        return [
+            'result' => [
+                'sessionId' => $helper->checkTransactionSession($order)->id,
+                'orderId' => $order->getId()
+            ]
+        ];
     }
 }
