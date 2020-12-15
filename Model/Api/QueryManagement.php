@@ -2,113 +2,64 @@
 
 namespace Paymark\PaymarkOE\Model\Api;
 
-use Magento\Sales\Model\Order;
-
-class QueryManagement
+class QueryManagement extends AbstractManagement
 {
 
     /**
-     * @var \Magento\Framework\UrlInterface
-     */
-    private $_urlInterface;
-
-    /**
-    *  @var \Magento\Checkout\Model\Session
-    */
-    private $_checkoutSession;
-
-    /**
-     * @var \Magento\Framework\Message\ManagerInterface
-     */
-    private $_messageManager;
-
-    /**
-     * QueryManagement constructor.
+     * Get Paymark transaction details and return order status to frontend
      *
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Framework\Message\ManagerInterface $messageManager
-     * @param \Magento\Framework\UrlInterface $urlInterface
+     * @return bool|false|string
+     * @throws \Exception
      */
-    public function __construct(
-        \Magento\Checkout\Model\Session $checkoutSession,
-        \Magento\Framework\Message\ManagerInterface $messageManager,
-        \Magento\Framework\UrlInterface $urlInterface
-    )
+    public function getTransactionDetails()
     {
-        $this->_urlInterface = $urlInterface;
-        $this->_checkoutSession = $checkoutSession;
-        $this->_messageManager = $messageManager;
-    }
+        $params = $this->getRequest()->getParams();
+        $orderId = !empty($params['id']) ? $params['id'] : null;
 
-    /**
-     * Get Paymark transaction status and return order status to frontend
-     *
-     * @return array|mixed|string
-     */
-    public function getTransactionStatus()
-    {
-        $order = $this->_checkoutSession->getLastRealOrder();
+        $helper = $this->getHelper();
 
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $helper = $objectManager->create("\Paymark\PaymarkOE\Helper\Helper");
+        if(!$orderId) {
+            $helper->log(__METHOD__ . " no order id passed back to query api");
+            return false;
+        }
 
-        if(!$order) {
-            $helper->log(__METHOD__. " no last order?");
+        try {
+            $order = $helper->getOrderById($orderId);
+        } catch (\Exception $e) {
+            $this->addMessageError('Order missing');
+
+            return $this->failedResponse();
         }
 
         // double check order to see if it's already completed
-        if($response = $this->handleResponse($order)) {
+        if ($response = $this->handleResponse($order)) {
             return $response;
         }
 
-        $order = $helper->getOrderByIncrementId($order->getIncrementId());
-        $helper->processOrder($order);
+        try {
+            $helper->processOrder($order);
 
-        return $this->handleResponse($order);
-    }
+            return $this->handleResponse($order);
+        } catch (\Exception $e) {
+            $this->addMessageError($e->getMessage());
 
-    /**
-     * Handle order response to client
-     *
-     * @param $order
-     * @return bool|false|string
-     */
-    private function handleResponse($order) {
-        switch ($order->getState()) {
-            case Order::STATE_PROCESSING:
-            case Order::STATE_COMPLETE:
-                return json_encode([
-                    'status' => 'success',
-                    'redirect' => $this->_urlInterface->getUrl("checkout/onepage/success", [
-                        "_secure" => true
-                    ])
-                ]);
-                break;
-            case Order::STATE_CANCELED:
-                // set error message for cart page
-                $this->addMessageError('Payment was declined');
-
-                return json_encode([
-                    'status' => 'failed',
-                    'redirect' => $this->_urlInterface->getUrl("checkout/cart", [
-                        "_secure" => true
-                    ])
-                ]);
-                break;
-            case Order::STATE_PENDING_PAYMENT:
-                // if pending - wait
-                break;
+            return $this->failedResponse();
         }
-
-        return false;
     }
 
     /**
-     * Add error message to session to display back to user
+     * Failure response
      *
-     * @param $errorMessage
+     * @return string
      */
-    public function addMessageError($errorMessage) {
-        $this->_messageManager->addErrorMessage($errorMessage);
+    public function failedResponse()
+    {
+        return json_encode([
+            'status' => 'failed',
+            'redirect' => $this->getUrlInterface()->getUrl("checkout/cart", [
+                "_secure" => true
+            ])
+        ]);
     }
+
 }

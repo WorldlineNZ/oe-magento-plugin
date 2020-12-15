@@ -5,6 +5,7 @@ namespace Paymark\PaymarkOE\Model;
 use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\StoreManager;
 use Paymark\PaymarkOE\Exception\ApiConflictException;
+use Paymark\PaymarkOE\Exception\ApiNotFoundException;
 use Zend\Http\Client;
 use Zend\Http\Request;
 
@@ -76,6 +77,12 @@ class OnlineEftposApi
      */
     protected $_storeManager;
 
+    const OPEN_STATUS_SESSION = 'SESSION_CREATED';
+
+    const OPEN_STATUS_PAYMENT = 'PAYMENT_CREATED';
+
+    const OPEN_STATUS_PROCESSED = 'PAYMENT_PROCESSED';
+
     const TYPE_REGULAR = 'REGULAR';
 
     const TYPE_TRUSTSETUP = 'TRUSTSETUP';
@@ -129,46 +136,55 @@ class OnlineEftposApi
     }
 
     /**
-     * Generate payment request with Paymark OE
+     * Create a new Openjs payment session
      *
      * @param $orderId
      * @param $value
      * @param $currency
-     * @param $payerId
-     * @param $bankId
-     * @param $description
-     * @param $merchantUrl
-     * @param $callbackUrl
-     * @param $type
-     * @param string $payerType
+     * @param bool $autopay
+     * @param array $trustIds
      * @return mixed
      * @throws \Exception
      */
-    public function createTransaction($orderId, $value, $currency, $payerId, $bankId, $description, $merchantUrl, $callbackUrl, $type = self::TYPE_REGULAR, $payerType = 'MOBILE')
+    public function createOpenSession($orderId, $value, $currency, $autopay = false, $trustIds = [])
     {
         $params = [
-            'bank' => [
-                'payerId' => $payerId,
-                'bankId' => $bankId,
-                'payerIdType' => $payerType
-            ],
-            'merchant' => [
-                'merchantIdCode' => $this->_merchantId,
-                'merchantUrl' => $merchantUrl,
-                'callbackUrl' => $callbackUrl
-            ],
-            'transaction' => [
-                'amount' => $value,
-                'transactionType' => $type,
-                'currency' => $currency,
-                'description' => $description,
-                'orderId' => $orderId,
-                'userAgent' => $_SERVER['HTTP_USER_AGENT'],
-                'userIpAddress' => $this->getClientIP()
-            ]
+            'amount' => (int) $value,
+            'currency' => $currency,
+            'merchantIdCode' => $this->_merchantId,
+            'orderId' => $orderId,
+            'allowAutopay' => $autopay
         ];
 
-        return $this->call(Request::METHOD_POST, 'transaction/oepayment/', $params);
+        if($trustIds) {
+            $params['trustIds'] = $trustIds;
+        }
+
+        return $this->call(Request::METHOD_POST, 'openjs/v1/session', $params);
+    }
+
+    /**
+     * Query Openjs session status
+     *
+     * @param $transactionId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function queryOpenSession($transactionId)
+    {
+        return $this->call(Request::METHOD_GET, 'openjs/v1/session/' . $transactionId);
+    }
+
+    /**
+     * Get full Openjs transaction details
+     *
+     * @param $transactionId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getOpenTransaction($transactionId)
+    {
+        return $this->call(Request::METHOD_GET, 'openjs/v1/payment?sessionId=' . $transactionId);
     }
 
     /**
@@ -180,7 +196,7 @@ class OnlineEftposApi
      */
     public function getTransaction($transactionId)
     {
-        return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId);
+        return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId, [], false, true);
     }
 
     /**
@@ -194,7 +210,7 @@ class OnlineEftposApi
     {
         return $this->call(Request::METHOD_PUT, 'oemerchanttrust/' . $autopayId, [
             'status' => 'CANCELLED'
-        ]);
+        ], false, true);
     }
 
     /**
@@ -204,10 +220,12 @@ class OnlineEftposApi
      * @param null $uri
      * @param array $params
      * @param bool $authorise
+     * @param bool $customType
      * @return mixed
-     * @throws \Exception
+     * @throws ApiConflictException
+     * @throws ApiNotFoundException
      */
-    public function call($method, $uri = null, array $params = [], $authorise = false)
+    public function call($method, $uri = null, array $params = [], $authorise = false, $customType = false)
     {
         $this->_client->reset();
 
@@ -221,9 +239,10 @@ class OnlineEftposApi
                 $this->_client->setAuth($this->_consumerKey, $this->_consumerSecret);
 
                 $params['grant_type'] = 'client_credentials';
+
                 $this->_client->setParameterPost($params);
             } else {
-                $contentType = 'application/vnd.paymark_api+json';
+                $contentType = $customType ? 'application/vnd.paymark_api+json' : 'application/json';
 
                 $this->_client->setHeaders([
                     'Authorization' => 'Bearer ' . $this->_bearer,
@@ -247,6 +266,8 @@ class OnlineEftposApi
 
             $response = $this->_client->getResponse();
 
+            $this->_helper->log($response->getBody());
+
         } catch (\Zend\Http\Exception\RuntimeException $e) {
             $this->_helper->log('Zend client error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
@@ -265,11 +286,16 @@ class OnlineEftposApi
         // http error code
         $this->setStatusCode($response->getStatusCode());
 
+        $this->_helper->log('response status: ' . $response->getStatusCode());
+
         switch ($response->getStatusCode()) {
             case 200:
             case 201:
             case 204:
                 return $responseData;
+
+            case 404:
+                throw new ApiNotFoundException('Transaction not found', $response->getStatusCode());
 
             case 409:
                 $message = !empty($responseData->error) ? $responseData->error : 'Conflict error while processing';

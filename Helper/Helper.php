@@ -6,9 +6,11 @@ use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Component\ComponentRegistrar;
 use Magento\Framework\Component\ComponentRegistrarInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order\Status\HistoryFactory;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Sales\Model\Order;
+use Paymark\PaymarkOE\Exception\ApiNotFoundException;
 use Paymark\PaymarkOE\Model\OnlineEftposApi;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Quote\Api\CartRepositoryInterface;
@@ -30,6 +32,11 @@ class Helper
      * @var \Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface
      */
     private $_transactionBuilder;
+
+    /**
+     * @var \Magento\Customer\Model\Session
+     */
+    private $_customerSession;
 
     /**
      * @var \Magento\Checkout\Model\Session
@@ -112,6 +119,8 @@ class Helper
 
         $this->_transactionBuilder = $this->_objectManager->get('\Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface');
 
+        $this->_customerSession = $this->_objectManager->get('\Magento\Customer\Model\Session');
+
         $this->_checkoutSession = $this->_objectManager->get('\Magento\Checkout\Model\Session');
 
         $this->_logger = $this->_objectManager->get("\Paymark\PaymarkOE\Logger\PaymentLogger");
@@ -156,6 +165,39 @@ class Helper
     public function isProdMode()
     {
         return $this->getConfig('debug') == 0 ? true : false;
+    }
+
+    /**
+     * Can this customer use autopay
+     *
+     * @return bool
+     */
+    public function canUseAutopay()
+    {
+        return ($this->_customerSession->isLoggedIn() && $this->getConfig('allow_autopay') == 1);
+    }
+
+    /**
+     * Can this customer use autopay
+     *
+     * @return bool
+     */
+    public function getCustomerTrustIds()
+    {
+        $list = [];
+
+        if(!$this->canUseAutopay()) {
+            return $list;
+        }
+
+        $agreementHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\AgreementHelper");
+        $agreements = $agreementHelper->getCustomerAgreements($this->_customerSession->getCustomerId());
+
+        foreach ($agreements as $agreement) {
+            $list[] = $agreement->getGatewayToken();
+        }
+
+        return $list;
     }
 
     /**
@@ -220,6 +262,29 @@ class Helper
     }
 
     /**
+     * Get order model collection
+     *
+     * @return \Magento\Sales\Model\Order
+     */
+    public function getOrderModel()
+    {
+        return $this->_objectManager->create('Magento\Sales\Model\Order');
+    }
+
+    /**
+     * Get order by entity id
+     *
+     * @param $orderId
+     * @return mixed
+     */
+    public function getOrderById($orderId)
+    {
+        $orderInfo = $this->getOrderModel()->load($orderId);
+
+        return $orderInfo->getId() ? $orderInfo : null;
+    }
+
+    /**
      * Get order by increment id
      *
      * @param $incrementId
@@ -227,10 +292,50 @@ class Helper
      */
     public function getOrderByIncrementId($incrementId)
     {
-        $collection = $this->_objectManager->create('Magento\Sales\Model\Order');
-        $orderInfo = $collection->loadByIncrementId($incrementId);
+        $orderInfo = $this->getOrderModel()->loadByIncrementId($incrementId);
 
         return $orderInfo->getId() ? $orderInfo : null;
+    }
+
+    /**
+     * Query OpenJS transaction session
+     *
+     * @param $order
+     * @return bool|mixed
+     * @throws \Exception
+     */
+    public function checkTransactionSession($order)
+    {
+        /** @var \Paymark\PaymarkOE\Helper\ApiHelper $apiHelper */
+        $apiHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\ApiHelper");
+
+        $transactionId = $this->getTransactionIdFromOrder($order);
+
+        if(empty($transactionId)) {
+            $this->log(__METHOD__. " session id missing from order " . $order->getIncrementId());
+            return false;
+        }
+
+        try {
+            $transaction = $apiHelper->querySession($transactionId);
+
+            if (empty($transaction) || !$transaction->id) {
+                $this->log(__METHOD__. " transaction missing for " . $order->getIncrementId());
+                throw new LocalizedException(__('Payment session missing for order.'));
+            }
+
+            // @todo this may cause some issues - e.g. cancelling a order where payment is underway
+            if ($transaction->status != OnlineEftposApi::OPEN_STATUS_SESSION) {
+                $this->log(__METHOD__. " payment already underway for " . $order->getIncrementId());
+                throw new LocalizedException(__('Payment already created.'));
+            }
+
+            return $transaction;
+
+        } catch (\Exception $e) {
+            $this->_orderFailed($order);
+            throw $e;
+        }
     }
 
     /**
@@ -241,8 +346,12 @@ class Helper
      */
     public function getTransactionIdFromOrder($order)
     {
+        /** @var \Magento\Sales\Model\Order\Payment\Interceptor $payment */
         $payment = $order->getPayment();
+
+        /** @var array $paymentInfo */
         $additionalInfo = $payment->getAdditionalInformation();
+
         return !empty($additionalInfo["TransactionID"]) ? $additionalInfo["TransactionID"] : null;
     }
 
@@ -252,35 +361,50 @@ class Helper
      * @param $order
      * @param bool $query
      * @return bool
+     * @throws \Exception
      */
     public function processOrder($order, $query = true)
     {
         $logPrepend = $query ? '(query)' : '(callback)';
+
+        /** @var \Paymark\PaymarkOE\Helper\ApiHelper $apiHelper */
         $apiHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\ApiHelper");
 
         // if already completed for whatever reason, just stop
-        if(in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
-            $this->log(__METHOD__. " " . $logPrepend . " order already completed or cancelled " . $order->getEntityId());
+        if (in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
+            $this->log(__METHOD__ . " " . $logPrepend . " order already completed or cancelled " . $order->getEntityId());
             return false;
         }
 
-        if(!($transactionId = $this->getTransactionIdFromOrder($order))) {
+        //@todo should these errors be sent up to frontend? could be exceptions - this could also handle all logs
+        if (!($transactionId = $this->getTransactionIdFromOrder($order))) {
             //something has gone wrong
-            $this->log(__METHOD__. " " . $logPrepend . " transaction id not found " . $order->getEntityId());
+            $this->log(__METHOD__ . " " . $logPrepend . " transaction id not found " . $order->getEntityId());
             return false;
         }
 
         $this->log(__METHOD__ . " " . $logPrepend . " order found");
 
-        $transaction = $apiHelper->findTransaction($transactionId);
+        try {
+            $transaction = $apiHelper->getTransaction($transactionId);
 
-        $this->log(__METHOD__ . " " . $logPrepend . " check and process transaction");
+            $this->log(__METHOD__ . " " . $logPrepend . " check and process transaction");
 
-        $result = $this->checkTransactionAndProcess($transaction);
+            $result = $this->checkTransactionAndProcess($transaction);
 
-        $this->log(__METHOD__ . " " . $logPrepend . " process transaction result: " . $result);
+            $this->log(__METHOD__ . " " . $logPrepend . " process transaction result: " . $result);
 
-        return $result;
+            return $result;
+        } catch (ApiNotFoundException $e) {
+            // transaction not found yet, could still be pending
+            // just softly fail so we can keep checking.
+            return false;
+        } catch (\Exception $e) {
+            // something went quite wrong
+            // cancel the order then re-throw the exception
+            $this->_orderFailed($order);
+            throw $e;
+        }
     }
 
     /**
@@ -294,7 +418,7 @@ class Helper
     {
         $this->log(__METHOD__. " check transaction");
 
-        if(empty($transaction->status) || empty($transaction->transaction->orderId)) {
+        if(empty($transaction->status) || empty($transaction->merchantOrderId)) {
             $this->log(__METHOD__. " no response status or increment id, something has gone quite wrong.");
             return false;
         }
@@ -317,7 +441,7 @@ class Helper
     public function processTransaction($transaction, $orderState = null) {
         $this->log(__METHOD__. " handle transaction");
 
-        $incrementId = $transaction->transaction->orderId;
+        $incrementId = $transaction->merchantOrderId;
         $success = ($transaction->status == self::PAYMENT_AUTHORISED ? true : false);
 
         // find order from increment id
@@ -329,7 +453,7 @@ class Helper
         }
 
         $originalAmount = bcmul($order->getBaseGrandTotal(), 100);
-        $transactAmount = $transaction->transaction->amount;
+        $transactAmount = $transaction->amount;
         if($transactAmount != $originalAmount) {
             //transaction value has been modified
             $this->log(__METHOD__. " transaction amount doesn't match original order amount: " . $incrementId);
@@ -385,9 +509,9 @@ class Helper
      */
     private function _saveAutopayToken($transaction, $order)
     {
-        if (empty($transaction->trust) ||
-            $transaction->trust->trustPaymentStatus != self::AUTOPAY_APPROVED ||
-            $transaction->transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
+        if (empty($transaction->trustPaymentStatus) ||
+            $transaction->trustPaymentStatus != self::AUTOPAY_APPROVED ||
+            $transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
         ) {
             return false;
         }
@@ -396,9 +520,9 @@ class Helper
 
         $agreement = $agreementHelper->createCustomerAgreement(
             $order->getCustomerId(),
-            $transaction->trust->id,
-            $transaction->bank->payerId,
-            $transaction->bank->bankId
+            $transaction->trustId,
+            $transaction->payerId,
+            $transaction->bankId
         );
 
         $this->log(__METHOD__ . " autopay agreement created successfully");
@@ -437,7 +561,7 @@ class Helper
     private function _orderSuccess(\Magento\Sales\Model\Order $order, \Magento\Sales\Model\Order\Payment $payment, $transaction, $orderState = null)
     {
         $transID = $transaction->id;
-        $amount = bcdiv($transaction->transaction->amount, 100); //convert back to decimal
+        $amount = bcdiv($transaction->amount, 100); //convert back to decimal
 
         $order->setCanSendNewEmailFlag(true);
 
@@ -532,6 +656,8 @@ class Helper
         $info = $payment->getAdditionalInformation();
 
         $info['Status'] = $transaction->status;
+        $info['selected_bank'] = $transaction->bankId;
+        $info['mobile_number'] = $transaction->payerId;
 
         $payment->unsAdditionalInformation();
         $payment->setAdditionalInformation($info);
