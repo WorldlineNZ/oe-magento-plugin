@@ -126,13 +126,26 @@ class ApiHelper extends AbstractHelper
     }
 
     /**
+     * Get a Openjs payment using the $transactionId
+     *
+     * @param $transactionId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getOpenPayment($transactionId)
+    {
+        $this->_paymarkApi->login();
+        return $this->_paymarkApi->getOpenPayment($transactionId);
+    }
+
+    /**
      * Get a completed Openjs transaction using the $transactionId
      *
      * @param $transactionId
      * @return mixed
      * @throws \Exception
      */
-    public function getTransaction($transactionId)
+    public function getOpenTransaction($transactionId)
     {
         $this->_paymarkApi->login();
         return $this->_paymarkApi->getOpenTransaction($transactionId);

@@ -18,7 +18,7 @@ class QueryManagement extends AbstractManagement
 
         $helper = $this->getHelper();
 
-        if(!$orderId) {
+        if (!$orderId) {
             $helper->log(__METHOD__ . " no order id passed back to query api");
             return false;
         }
