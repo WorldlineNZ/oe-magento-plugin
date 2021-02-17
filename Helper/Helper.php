@@ -367,9 +367,6 @@ class Helper
     {
         $logPrepend = $query ? '(query)' : '(callback)';
 
-        /** @var \Paymark\PaymarkOE\Helper\ApiHelper $apiHelper */
-        $apiHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\ApiHelper");
-
         // if already completed for whatever reason, just stop
         if (in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
             $this->log(__METHOD__ . " " . $logPrepend . " order already completed or cancelled " . $order->getEntityId());
@@ -383,14 +380,10 @@ class Helper
             return false;
         }
 
-        $this->log(__METHOD__ . " " . $logPrepend . " order found");
-
         try {
-            $transaction = $apiHelper->getTransaction($transactionId);
+            $this->log(__METHOD__ . " " . $logPrepend . " order found, check and process transaction");
 
-            $this->log(__METHOD__ . " " . $logPrepend . " check and process transaction");
-
-            $result = $this->checkTransactionAndProcess($transaction);
+            $result = $this->checkTransactionAndProcess($transactionId);
 
             $this->log(__METHOD__ . " " . $logPrepend . " process transaction result: " . $result);
 
@@ -410,21 +403,33 @@ class Helper
     /**
      * Check transaction status and update order if accepted/declined
      *
-     * @param $transaction
+     * @param $transactionId
      * @param null $orderState
-     * @return bool
+     * @return bool|string
      */
-    public function checkTransactionAndProcess($transaction, $orderState = null)
+    public function checkTransactionAndProcess($transactionId, $orderState = null)
     {
-        $this->log(__METHOD__. " check transaction");
+        /** @var \Paymark\PaymarkOE\Helper\ApiHelper $apiHelper */
+        $apiHelper = $this->_objectManager->get("\Paymark\PaymarkOE\Helper\ApiHelper");
 
-        if(empty($transaction->status) || empty($transaction->merchantOrderId)) {
-            $this->log(__METHOD__. " no response status or increment id, something has gone quite wrong.");
+        // get the initial payment data
+        $payment = $apiHelper->getOpenPayment($transactionId);
+
+        if(empty($payment->status)) {
+            $this->log(__METHOD__. " no response status.");
             return false;
         }
 
-        if($transaction->status == self::PAYMENT_NEW || $transaction->status == self::PAYMENT_SUBMITTED) {
+        if($payment->status == self::PAYMENT_NEW || $payment->status == self::PAYMENT_SUBMITTED) {
             //order is not ready yet - do nothing
+            return false;
+        }
+
+        // if the payment status is AUTHORISED we need to retrieve the full transaction
+        $transaction = $apiHelper->getOpenTransaction($payment->id);
+
+        if (empty($transaction->transaction->orderId)) {
+            $this->log(__METHOD__ . " no order increment id, something has gone quite wrong.");
             return false;
         }
 
@@ -441,7 +446,7 @@ class Helper
     public function processTransaction($transaction, $orderState = null) {
         $this->log(__METHOD__. " handle transaction");
 
-        $incrementId = $transaction->merchantOrderId;
+        $incrementId = $transaction->transaction->orderId;
         $success = ($transaction->status == self::PAYMENT_AUTHORISED ? true : false);
 
         // find order from increment id
@@ -453,7 +458,7 @@ class Helper
         }
 
         $originalAmount = bcmul($order->getBaseGrandTotal(), 100);
-        $transactAmount = $transaction->amount;
+        $transactAmount = $transaction->transaction->amount;
         if($transactAmount != $originalAmount) {
             //transaction value has been modified
             $this->log(__METHOD__. " transaction amount doesn't match original order amount: " . $incrementId);
@@ -509,9 +514,9 @@ class Helper
      */
     private function _saveAutopayToken($transaction, $order)
     {
-        if (empty($transaction->trustPaymentStatus) ||
-            $transaction->trustPaymentStatus != self::AUTOPAY_APPROVED ||
-            $transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
+        if (empty($transaction->trust) ||
+            $transaction->trust->trustPaymentStatus != self::AUTOPAY_APPROVED ||
+            $transaction->transaction->transactionType != OnlineEftposApi::TYPE_TRUSTSETUP
         ) {
             return false;
         }
@@ -520,9 +525,9 @@ class Helper
 
         $agreement = $agreementHelper->createCustomerAgreement(
             $order->getCustomerId(),
-            $transaction->trustId,
-            $transaction->payerId,
-            $transaction->bankId
+            $transaction->trust->id,
+            $transaction->bank->payerId,
+            $transaction->bank->bankId
         );
 
         $this->log(__METHOD__ . " autopay agreement created successfully");
@@ -561,7 +566,7 @@ class Helper
     private function _orderSuccess(\Magento\Sales\Model\Order $order, \Magento\Sales\Model\Order\Payment $payment, $transaction, $orderState = null)
     {
         $transID = $transaction->id;
-        $amount = bcdiv($transaction->amount, 100); //convert back to decimal
+        $amount = bcdiv($transaction->transaction->amount, 100); //convert back to decimal
 
         $order->setCanSendNewEmailFlag(true);
 
@@ -656,8 +661,8 @@ class Helper
         $info = $payment->getAdditionalInformation();
 
         $info['Status'] = $transaction->status;
-        $info['selected_bank'] = $transaction->bankId;
-        $info['mobile_number'] = $transaction->payerId;
+        $info['selected_bank'] = $transaction->bank->bankId;
+        $info['mobile_number'] = $transaction->bank->payerId;
 
         $payment->unsAdditionalInformation();
         $payment->setAdditionalInformation($info);

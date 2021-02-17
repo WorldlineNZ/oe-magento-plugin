@@ -176,25 +176,25 @@ class OnlineEftposApi
     }
 
     /**
-     * Get full Openjs transaction details
+     * Get the Openjs payment status information
+     *
+     * @param $transactionId
+     * @return mixed
+     * @throws \Exception
+     */
+    public function getOpenPayment($transactionId)
+    {
+        return $this->call(Request::METHOD_GET, 'openjs/v1/payment?sessionId=' . $transactionId);
+    }
+
+    /**
+     * Get Openjs transaction details from transaction id
      *
      * @param $transactionId
      * @return mixed
      * @throws \Exception
      */
     public function getOpenTransaction($transactionId)
-    {
-        return $this->call(Request::METHOD_GET, 'openjs/v1/payment?sessionId=' . $transactionId);
-    }
-
-    /**
-     * Get transaction details from transaction id
-     *
-     * @param $transactionId
-     * @return mixed
-     * @throws \Exception
-     */
-    public function getTransaction($transactionId)
     {
         return $this->call(Request::METHOD_GET, 'transaction/oepayment/' . $transactionId, [], false, true);
     }
