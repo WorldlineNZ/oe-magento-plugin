@@ -88,6 +88,7 @@ final class ConfigProvider implements ConfigProviderInterface
             'payment' => [
                 self::CODE => [
                     'allow_autopay' => $this->_helper->canUseAutopay(),
+                    'production' => $this->_helper->isProdMode(),
                     'logo' => $this->getOnlineEftposLogo()
                 ]
             ]

@@ -2,6 +2,10 @@
  * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+var scriptUrl = window.checkoutConfig.payment.paymarkoe.production ?
+    '//open.paymark.co.nz/v1/loader/open.js' : '//open.demo.paymark.co.nz/v1/loader/open.js';
+
 /*browser:true*/
 /*global define*/
 define(
@@ -13,7 +17,7 @@ define(
         'Paymark_PaymarkOE/js/action/paymark-status',
         'Paymark_PaymarkOE/js/action/paymark-query',
         'Magento_Checkout/js/model/full-screen-loader',
-        '//open.demo.paymark.co.nz/v1/loader/open.js'
+        scriptUrl
     ],
     function ($, ko, Component, quote, paymarkStatus, paymarkQuery, fullScreenLoader, openJs) {
         'use strict';
