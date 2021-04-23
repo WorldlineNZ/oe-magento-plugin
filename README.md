@@ -27,6 +27,8 @@ php bin/magento setup:upgrade
 
 You will need to have an Online EFTPOS account before configuring this module. Visit https://www.paymark.co.nz/products/online-eftpos/ for more info.
 
+Once you have an Online EFTPOS account you need to enter all the domains of your web sites where the Magento plugin will be used into the OpenJS Configuration area under Settings in the Online EFTPOS Portal: https://oe.paymark.co.nz/ (production) or https://oe.demo.paymark.co.nz/ (UAT/Sandbox).  
+
 After the module has been installed go to `Stores > Settings > Configuration > Sales > Payment Methods` in the Magento Admin to find the configuration options.
 
 The configuration options are as follows:
