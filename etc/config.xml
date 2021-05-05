@@ -33,5 +33,14 @@
                 <title>Online EFTPOS</title>
             </paymarkoe_vault>-->
         </payment>
+
+        <dev>
+            <js>
+                <minify_exclude>
+                    <production>//open.paymark.co.nz/v1/loader/open.js</production>
+                    <development>//open.demo.paymark.co.nz/v1/loader/open.js</development>
+                </minify_exclude>
+            </js>
+        </dev>
     </default>
 </config>
