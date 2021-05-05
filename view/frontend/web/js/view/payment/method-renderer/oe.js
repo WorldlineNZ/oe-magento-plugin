@@ -4,7 +4,7 @@
  */
 
 var scriptUrl = window.checkoutConfig.payment.paymarkoe.production ?
-    '//open.paymark.co.nz/v1/loader/open.js' : '//open.demo.paymark.co.nz/v1/loader/open.js';
+    '//open.paymark.co.nz/v1' : '//open.demo.paymark.co.nz/v1';
 
 /*browser:true*/
 /*global define*/
