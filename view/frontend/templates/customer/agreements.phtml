@@ -16,7 +16,7 @@
                 </td>
                 <td class="col"><?php echo htmlentities($agreement["payer"]) ?></td>
                 <td class="col a-right view">
-                    <a class="delete-paymarkoe-agreement" href="<?php echo $block->escapeUrl($agreement["delete"]) ?>"><?php echo __("Delete") ?></a>
+                    <a class="delete-paymarkoe-agreement" href="#" data-agreement="<?php echo $block->escapeUrl($agreement["delete"]) ?>"><?php echo __("Delete") ?></a>
                 </td>
             </tr>
         <?php endforeach; ?>
@@ -32,17 +32,17 @@
             jQuery('.delete-paymarkoe-agreement').on('click', function (event) {
                 event.preventDefault();
 
-                var url = event.currentTarget.href;
+                var formKey = jQuery.mage.cookies.get('form_key');
+                var url = event.currentTarget.dataset.agreement;
+                if (!formKey || !url) {
+                    return false;
+                }
 
                 confirm({
                     content:  "<?php echo __("Are you sure you want to delete this agreement?") ?>",
                     actions: {
                         confirm: function() {
-                            window.location.href = url;
-                        },
-                        cancel: function() {
-                        },
-                        always: function() {
+                            window.location.href = url + 'form_key/' + formKey;
                         }
                     }
                 });
