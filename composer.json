@@ -11,7 +11,7 @@
         "ext-openssl" : "*"
     },
     "type": "magento2-module",
-    "version": "0.5.2",
+    "version": "0.5.3",
     "license": "MIT",
     "autoload": {
         "files": [
