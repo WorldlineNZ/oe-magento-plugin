@@ -1,7 +1,7 @@
 # Paymark payment module for Magento 2.x
 This is a Paymark Online EFTPOS payment module for Magento 2. Please read this file carefully and follow all instructions to install and configure the payment module successfully.
 
-Tested on Magento 2.3.x only.
+Tested on Magento 2.3 and 2.4 only.
 
 ## Installation
 
