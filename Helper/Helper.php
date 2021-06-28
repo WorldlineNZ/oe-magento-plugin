@@ -365,7 +365,7 @@ class Helper
      */
     public function processOrder($order, $query = true)
     {
-        $logPrepend = $query ? '(query)' : '(callback)';
+        $logPrepend = $query ? '(query)' : '(cron)';
 
         // if already completed for whatever reason, just stop
         if (in_array($order->getState(), [Order::STATE_PROCESSING, Order::STATE_CANCELED, Order::STATE_COMPLETE])) {
