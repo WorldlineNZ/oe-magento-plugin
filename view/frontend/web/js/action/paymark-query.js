@@ -17,8 +17,8 @@ define(
         return function (orderId, messageContainer) {
             var module = 'paymarkoe';
             var attempts = 0;
-            var timeoutLength = 4000; // 4 second query interval
-            var maxAttempts = 101; // 5 minute 4 second wait period (so as that we get a response from the API before this completely fails)
+            var timeoutLength = 5000; // 5 second query interval
+            var maxAttempts = 65; // 5 minute 5 second wait period (so as that we get a response from the API before this completely fails)
             var redirectUrl = null;
             var finished = false;
             var interval = null;
