@@ -6,8 +6,9 @@ use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\StoreManager;
 use Paymark\PaymarkOE\Exception\ApiConflictException;
 use Paymark\PaymarkOE\Exception\ApiNotFoundException;
-use Zend\Http\Client;
-use Zend\Http\Request;
+use Laminas\Http\Request;
+use Laminas\Http\Client;
+use Laminas\Http\Exception\RuntimeException;
 
 class OnlineEftposApi
 {
@@ -38,7 +39,7 @@ class OnlineEftposApi
     private $_sandboxUrl = 'https://apitest.paymark.nz/';
 
     /**
-     * @var \Zend\Http\Client
+     * @var Client
      */
     private $_client;
 
@@ -91,12 +92,12 @@ class OnlineEftposApi
 
     /**
      * OnlineEftposApi constructor.
-     * @param Client $zendClient
+     * @param Client $requestClient
      * @param EncryptorInterface $encryptor
      * @param StoreManager $storeManager
      */
     public function __construct(
-        Client $zendClient,
+        Client $requestClient,
         EncryptorInterface $encryptor,
         StoreManager $storeManager
     )
@@ -105,7 +106,7 @@ class OnlineEftposApi
 
         $this->_storeManager = $storeManager;
 
-        $this->_client = $zendClient;
+        $this->_client = $requestClient;
 
         $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
 
@@ -268,11 +269,11 @@ class OnlineEftposApi
 
             $this->_helper->log($response->getBody());
 
-        } catch (\Zend\Http\Exception\RuntimeException $e) {
-            $this->_helper->log('Zend client error: ' . $e->getMessage());
+        } catch (RuntimeException $e) {
+            $this->_helper->log('Laminas client error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         } catch (\Exception $e) {
-            $this->_helper->log('Zend client error: ' . $e->getMessage());
+            $this->_helper->log('Laminas client error: ' . $e->getMessage());
             throw new \Exception($e->getMessage());
         }
 
